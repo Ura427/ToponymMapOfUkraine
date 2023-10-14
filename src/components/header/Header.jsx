@@ -1,15 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const Header = () => {
+
+
   return (
     // <header className="p-3 text-bg-dark">
     //   <div className="container">
@@ -64,6 +66,11 @@ const Header = () => {
     //     </div>
     //   </div>
     // </header>
+
+
+   
+
+
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
@@ -79,8 +86,12 @@ const Header = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Toponym UA
           </Typography>
-          <Button color="inherit">Login</Button>
-          <Button color="inherit">Sign up</Button>
+          <Link to="/login" style={{ color: "inherit", textDecoration: "none"}}>
+            <Button color="inherit">Login</Button>
+          </Link>
+          <Link to="/registration" style={{ color: "inherit", textDecoration: "none"}}>
+            <Button color="inherit" style={{textDecoration: "none"}}>Sign up</Button>
+          </Link>
         </Toolbar>
       </AppBar>
     </Box>

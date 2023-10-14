@@ -1,46 +1,53 @@
 import React, { useEffect } from "react";
 import "./Body.css";
 
+import Typography from "@mui/material/Typography";
+import Modal from "@mui/material/Modal";
+import Box from "@mui/material/Box";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Divider from "@mui/material/Divider";
+import InboxIcon from "@mui/icons-material/Inbox";
+import DraftsIcon from "@mui/icons-material/Drafts";
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+};
+
 const Body = (place) => {
-  
-  //useEffect(() => {
-  //   const allPaths = document.querySelectorAll(".allPaths");
+  const [open, setOpen] = React.useState(false);
+  const [modalTitle, setModalTitle] = React.useState("");
+  const [modalDescription, setModalDescription] = React.useState("");
 
-  //   allPaths.forEach((e) => {
-  //     // Replace spaces in e.id with underscores
-  //     const sanitizedId = e.id.replace(/\s/g, "_");
-  //     e.classList.add(`allPaths_${sanitizedId}`);
+  //Modal handlers
+  const handleOpen = (region) => {
+    console.log(region);
+    console.log(getInfo(region));
 
-  //     // Occurs when mouse enters city area
-  //     e.addEventListener("mouseover", function () {
-  //       document.onmousemove = function (j) {
-  //         const x = j.clientX;
-  //         const y = j.clientY;
-  //         document.getElementById("name").style.top = y - 60 + "px";
-  //         document.getElementById("name").style.left = x + 10 + "px";
-  //       };
-  //       // const classes = e.getAttribute("class").replace(/ /g, ".");
-  //       // document.querySelectorAll(`.${classes}`).forEach((country) => {
-  //       //   country.style.fill = "pink";
-  //       // });
-  //       document.getElementById("name").style.opacity = 1;
+    setModalTitle(region);
+    setModalDescription(getInfo(region));
 
-  //       document.getElementById("namep").innerText = e.getAttribute("name");
-  //     });
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
 
-  //     // Occurs when mouse leaves city area
-  //     e.addEventListener("mouseleave", function () {
-  //       // const classes = e.getAttribute("class").replace(/ /g, ".");
-  //       // document.querySelectorAll(`.${classes}`).forEach((country) => {
-  //       //   country.style.fill = "#858282";
-  //       // });
-  //       document.getElementById("name").style.opacity = 0;
-  //     });
+  const fillList = () => {};
 
-  //   });
-  // }, []);
-
-  async function getInfo(place) {
+  const getInfo = (place) => {
     var dict = {
       Vinnytsia: {
         Бершадь:
@@ -161,38 +168,29 @@ const Body = (place) => {
       },
     };
 
+    var result = "";
+
     var dictKeysArray = Object.keys(dict[place]);
-    console.log(dictKeysArray);
-
-    // Get and clear toponym-list element
-    var toponymList = document.getElementById("toponym-list");
-    toponymList.empty();
-
-    // Creating list
-    var ul = document.createElement("ul");
-    ul.classList.add("myList");
-    toponymList.appendChild(ul);
+    // console.log(dictKeysArray);
 
     //Filling list
     for (var i = 0; i < dictKeysArray.length; i++) {
-      var listItem = document.createElement("li");
-      listItem.classList.add("toponym-item");
-      listItem.innerText = dictKeysArray[i];
-      ul.appendChild(listItem);
+      result += dictKeysArray[i];
+      result += "                         ";
     }
 
-    if (toponymList.style.display === "") return; // already visible
+    return result;
+  };
 
-    toponymList.style.display = "";
-  }
-
+  //Svg handlers
   const svgClickHandler = (event) => {
     const target = event.target;
     const elementId = target.id;
     const elementName = target.getAttribute("name");
 
     console.log("clicked " + elementId + " " + elementName);
-    getInfo(elementId);
+
+    // handleOpen(elementId);
   };
 
   const svgHoverHandler = (event) => {
@@ -200,14 +198,14 @@ const Body = (place) => {
     const elementId = target.id;
 
     event.target.style.fill = "pink";
-  }
+  };
 
   const svgLeaveHandler = (event) => {
     const target = event.target;
 
-    event.target.style.fill = "#858282"
+    event.target.style.fill = "#858282";
     document.getElementById("name").style.opacity = 0;
-  }
+  };
 
   const svgMoveHandler = (event) => {
     const target = event.target;
@@ -221,11 +219,64 @@ const Body = (place) => {
     nameDiv.style.left = x + 10 + "px";
     nameDiv.style.opacity = 1;
     nameDivText.innerText = target.getAttribute("name");
-  }
+  };
 
   return (
     <div id="page-body">
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            {modalTitle}
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            {modalDescription}
+          </Typography>
+        </Box>
+      </Modal>
       <div className="svg-container">
+        <Box sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", position: "relative" }}>
+          <nav aria-label="main mailbox folders">
+            <List>
+              <ListItem disablePadding>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Inbox" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <DraftsIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Drafts" />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </nav>
+          <Divider />
+          <nav aria-label="secondary mailbox folders">
+            <List>
+              <ListItem disablePadding>
+                <ListItemButton>
+                  <ListItemText primary="Trash" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton component="a" href="#simple-list">
+                  <ListItemText primary="Spam" />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </nav>
+        </Box>
+
         <svg
           xmlns="http://www.w3.org/2000/svg"
           baseProfile="tiny"
