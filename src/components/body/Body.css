@@ -66,11 +66,12 @@ svg path {
   }
   
   .svg-container {
-    max-width: 80%; /* Set a maximum width for the SVG container */
-    display: flex;
+    max-width: 80%; 
+    display: flex; 
     justify-content: center;
     align-items: center;
-    position: relative; /* Add relative positioning to contain absolutely positioned elements */
+    position: relative; 
+    margin: auto;
   }
   
   /* Adjust the SVG height if needed */
