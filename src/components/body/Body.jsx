@@ -7,12 +7,16 @@ import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
+import SearchIcon from '@mui/icons-material/Search';
 
-import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
-import InboxIcon from "@mui/icons-material/Inbox";
-import DraftsIcon from "@mui/icons-material/Drafts";
+import { styled, alpha } from '@mui/material/styles';
+import InputBase from '@mui/material/InputBase';
+import BodySearch from "../body-search/BodySearch";
+import BodyList from "../body-list/BodyList";
+
+
 
 const style = {
   position: "absolute",
@@ -26,13 +30,15 @@ const style = {
   p: 4,
 };
 
+
+
 const Body = (place) => {
   const [open, setOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalDescription, setModalDescription] = useState("");
+  const [modalTitle, setModalTitle] = useState();
+  const [modalDescription, setModalDescription] = useState();
 
   const [toponyms, setToponyms] = useState([]);
-  const [currRegion, setCurrRegion] = useState();
+  const [currRegion, setCurrRegion] = useState("");
   const [currToponym, setCurrToponym] = useState("");
 
 
@@ -41,7 +47,6 @@ const Body = (place) => {
       const toponymDescription = getToponymDescription(currRegion, currToponym);
       setModalTitle(currRegion);
       setModalDescription(toponymDescription);
-      // handleOpen();
     }
   }, [currToponym, currRegion]);
 
@@ -174,7 +179,7 @@ const Body = (place) => {
     setOpen(false);
   };
 
-
+  // Database interactions 
   const getToponymDescription = (region, toponymName) => {
     const toponymDescription = dict[region][toponymName];
     return toponymDescription;
@@ -195,11 +200,8 @@ const Body = (place) => {
     const elementId = target.id;
     const elementName = target.getAttribute("name");
 
-    console.log("clicked " + elementId + " " + elementName);
-
     getInfo(elementId);
     setCurrRegion(elementId);
-    // handleOpen(elementId);
   };
 
   const svgHoverHandler = (event) => {
@@ -231,25 +233,9 @@ const Body = (place) => {
   };
 
 
-  const listItemClickHandler = (toponym) => {
-    console.log("/////////////////////////////////")
+ const listItemClickHandler = (toponym) => {
     setCurrToponym(toponym);
-    
-
-    // const toponymDescription = getToponymDescription(currRegion, currToponym)
-
-    // console.log("toponym: " + toponym)
-    // console.log("currRegion: " + currRegion)
-    // console.log("currToponym: " + currToponym)
-    // console.log(toponymDescription)
-
-
-    // setModalTitle(currRegion);
-    // setModalDescription(toponymDescription);
-
     handleOpen();
-    // // console.log(currToponym);
-    // // console.log(modalDescription);
   }
 
 
@@ -271,25 +257,28 @@ const Body = (place) => {
         </Box>
       </Modal>
       <div className="svg-container">
-        <Box sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
-          <List>
-            <ListItem>
-              <ListItemText primary={currRegion}/>
-            </ListItem>
-          </List>
-          <Divider />
-          <nav aria-label="secondary mailbox folders">
-          <List>
-            {toponyms.map( toponym => 
-               <ListItem disablePadding>
-               <ListItemButton onClick={() => listItemClickHandler(toponym)} >
-                 <ListItemText primary={toponym} />
-               </ListItemButton>
-             </ListItem>
-              )}
-            </List>
-          </nav>
-        </Box>
+        {currRegion !== "" &&
+        // <Box sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", bgcolor: "red" }}>
+        //   <List>
+        //     <ListItem>
+        //       <ListItemText primary={currRegion}/>
+        //     </ListItem>
+        //   </List>
+        //   <Divider />
+        //   <nav aria-label="secondary mailbox folders">
+        //   <List>
+        //     {toponyms.map( toponym => 
+        //        <ListItem disablePadding>
+        //        <ListItemButton onClick={() => listItemClickHandler(toponym)} >
+        //          <ListItemText primary={toponym} />
+        //        </ListItemButton>
+        //      </ListItem>
+        //       )}
+        //     </List>
+        //   </nav>
+        // </Box>
+        <BodyList currRegion={currRegion} toponyms={toponyms} listItemClickHandler={listItemClickHandler} />
+        }
 
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -579,6 +568,7 @@ const Body = (place) => {
           <circle cx="77.6" cy="251.3" id="2"></circle>
         </svg>
       </div>
+          <BodySearch />
     </div>
   );
 };
