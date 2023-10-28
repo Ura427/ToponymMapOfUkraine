@@ -4,15 +4,6 @@ import "./Body.css";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import SearchIcon from '@mui/icons-material/Search';
-
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import { styled, alpha } from '@mui/material/styles';
-import InputBase from '@mui/material/InputBase';
 import BodySearch from "../body-search/BodySearch";
 import BodyList from "../body-list/BodyList";
 
@@ -45,7 +36,7 @@ const Body = (place) => {
   useEffect(() => {
     if (currToponym !== "") {
       const toponymDescription = getToponymDescription(currRegion, currToponym);
-      setModalTitle(currRegion);
+      setModalTitle(currToponym);
       setModalDescription(toponymDescription);
     }
   }, [currToponym, currRegion]);
@@ -258,28 +249,8 @@ const Body = (place) => {
       </Modal>
       <div className="svg-container">
         {currRegion !== "" &&
-        // <Box sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", bgcolor: "red" }}>
-        //   <List>
-        //     <ListItem>
-        //       <ListItemText primary={currRegion}/>
-        //     </ListItem>
-        //   </List>
-        //   <Divider />
-        //   <nav aria-label="secondary mailbox folders">
-        //   <List>
-        //     {toponyms.map( toponym => 
-        //        <ListItem disablePadding>
-        //        <ListItemButton onClick={() => listItemClickHandler(toponym)} >
-        //          <ListItemText primary={toponym} />
-        //        </ListItemButton>
-        //      </ListItem>
-        //       )}
-        //     </List>
-        //   </nav>
-        // </Box>
         <BodyList currRegion={currRegion} toponyms={toponyms} listItemClickHandler={listItemClickHandler} />
         }
-
         <svg
           xmlns="http://www.w3.org/2000/svg"
           baseProfile="tiny"
