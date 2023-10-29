@@ -45,7 +45,6 @@ const Body = (place) => {
 
   //Cut from BodySearch
 const [backendData, setBackendData] = React.useState([]);
-const [allToponyms, setAllToponyms] = React.useState([]);
 const [searchOptions, setSearchOptions] = React.useState([]);
 const [sortedSearchOptions, setSortedSearchOptions] = React.useState([]);
 
@@ -56,50 +55,55 @@ React.useEffect(() => {
       setBackendData(data);
     });
 }, []);
-// React.useEffect(() => {
-//   if (backendData.length > 0) {
-//     // You can set allToponyms here after backendData has been fetched
-//     setAllToponyms(
-//       backendData.map((region) => ({
-//         regionName: region.name,
-//         toponym: region.toponyms
-//       }))
-//     );
-
-//     setSearchOptions(allToponyms.flatMap(region => {
-//       return region.toponym.map(toponym => ({
-//         regionName: region.regionName,
-//         toponymName: toponym.name,
-//         toponymDescription: toponym.description,
-//       }));
-//     }));
-//   }
-// }, [backendData]);
 
 React.useEffect(() => {
   if (backendData.length > 0) {
-    setSearchOptions(backendData.flatMap(region => {
+    // setSearchOptions(backendData.flatMap(region => {
+    //   return region.toponyms.map(toponym => ({
+    //     regionName: region.name,
+    //     toponymName: toponym.name,
+    //     toponymDescription: toponym.description,
+    //   }));
+    // }));
+
+    const allToponyms = backendData.flatMap( region => {
       return region.toponyms.map(toponym => ({
         regionName: region.name,
         toponymName: toponym.name,
-        toponymDescription: toponym.description,
+        toponymDescription: toponym.description
       }));
-    }));
+    })
+
+    const alphabeticalSort = (a, b) => {
+      if (a.regionName === b.regionName) {
+        return a.toponymName.localeCompare(b.toponymName);
+      } else {
+        return a.regionName.localeCompare(b.regionName);
+      }
+    }
+
+    setSortedSearchOptions(allToponyms.sort((a, b) => {
+          if (a.regionName === b.regionName) {
+            return a.toponymName.localeCompare(b.toponymName);
+          } else {
+            return a.regionName.localeCompare(b.regionName);
+          }
+        }));
   }
 }, [backendData]);
 
 
 
 
-React.useEffect(() => {
-  setSortedSearchOptions(searchOptions.sort((a, b) => {
-    if (a.regionName === b.regionName) {
-      return a.toponymName.localeCompare(b.toponymName);
-    } else {
-      return a.regionName.localeCompare(b.regionName);
-    }
-  }));
-}, [searchOptions]);
+// React.useEffect(() => {
+//   setSortedSearchOptions(searchOptions.sort((a, b) => {
+//     if (a.regionName === b.regionName) {
+//       return a.toponymName.localeCompare(b.toponymName);
+//     } else {
+//       return a.regionName.localeCompare(b.regionName);
+//     }
+//   }));
+// }, [searchOptions]);
 
 // console.log("DATA: " + backendData)
 // console.log("ALL: " + allToponyms);
@@ -117,18 +121,8 @@ React.useEffect(() => {
   };
 
   // Database interactions 
-  // const getToponymDescription = (region, toponymName) => {
-  //   // const toponymDescription = dict[region][toponymName];
-  //   const toponym = searchOptions.find(element => element.regionName === region && element.toponymName === toponymName)
-  //   console.log(toponym)
-  //   // const toponymDescription = backendData[region][toponymName];
-  //   return toponym.toponymDescription;
-
-  // }
-
-
   const getToponymDescription = (region, toponymName) => {
-    const toponym = searchOptions.find(element => element.regionName === region && element.toponymName === toponymName);
+    const toponym = sortedSearchOptions.find(element => element.regionName === region && element.toponymName === toponymName);
     if (toponym) {
       // console.log(toponym);
       return toponym.toponymDescription;
@@ -138,7 +132,7 @@ React.useEffect(() => {
   }
   
   const getInfo = (region) => {
-    const toponyms = searchOptions.filter(element => {
+    const toponyms = sortedSearchOptions.filter(element => {
       return element.regionName === region;
     })
     const toponyms2 = toponyms.map(toponym => toponym.toponymName);
@@ -157,14 +151,14 @@ React.useEffect(() => {
   };
 
   const svgHoverHandler = (event) => {
-    const target = event.target;
-    const elementId = target.id;
+    // const target = event.target;
+    // const elementId = target.id;
 
     event.target.style.fill = "pink";
   };
 
   const svgLeaveHandler = (event) => {
-    const target = event.target;
+    // const target = event.target;
 
     event.target.style.fill = "#858282";
     document.getElementById("name").style.opacity = 0;
@@ -500,7 +494,7 @@ React.useEffect(() => {
           <circle cx="77.6" cy="251.3" id="2"></circle>
         </svg>
       </div>
-          <BodySearch sortedSearchOptions={sortedSearchOptions}/>
+          <BodySearch sortedSearchOptions={sortedSearchOptions} setCurrRegion={setCurrRegion} setCurrToponym={setCurrToponym}/>
     </div>
   );
 };
