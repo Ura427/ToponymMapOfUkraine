@@ -14,10 +14,8 @@ import Divider from "@mui/material/Divider";
 
 const BodyList = ({currRegion, toponyms, listItemClickHandler}) => {
 
-
-  console.log("Body list: " + toponyms)
   return (
-    <Box sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", bgcolor: "red" }}>
+    <Box sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", border: "black 1px solid" }}>
           <List>
             <ListItem>
               <ListItemText primary={currRegion}/>
