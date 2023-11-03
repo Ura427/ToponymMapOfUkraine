@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Autocomplete from '@mui/material/Autocomplete';
 
-export default function FreeSolo({sortedSearchOptions}) {
+export default function FreeSolo(props) {
 
   const [selectedOption, setSelectedOption] = React.useState(null);
 
@@ -15,7 +15,14 @@ export default function FreeSolo({sortedSearchOptions}) {
   // console.log( allToponyms.map((option) => option.regionName))
 
   const handleOptionChange = (event, newValue) =>{
-    setSelectedOption(newValue);
+    // setSelectedOption(newValue);
+    const values = newValue.split(" ");
+    const region = values[0];
+    const toponym = values[1]; 
+    props.setCurrRegion(region);
+    props.setCurrToponym(toponym);
+    props.handleOpen()
+
   }
 
   return (
@@ -25,15 +32,13 @@ export default function FreeSolo({sortedSearchOptions}) {
         freeSolo
         id="free-solo-2-demo"
         disableClearable
-        // options={searchOptions.map((option) => option.regionName + " " + option.toponymName)}
-        options={sortedSearchOptions.map((option) => option.regionName + " " + option.toponymName)}
-        // options={top100Films.map((option) => option.title)}
+        options={props.sortedSearchOptions.map((option) => option.regionName + " " + option.toponymName)}
         value={selectedOption}
         onChange={handleOptionChange}
         renderInput={(params) => (
           <TextField
             {...params}
-            label="Search input"
+            label="Пошук топоніму"
             InputProps={{
               ...params.InputProps,
               type: 'search',

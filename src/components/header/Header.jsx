@@ -87,10 +87,10 @@ const Header = () => {
             Toponym UA
           </Typography>
           <Link to="/login" style={{ color: "inherit", textDecoration: "none"}}>
-            <Button color="inherit">Login</Button>
+            <Button color="inherit">Увійти</Button>
           </Link>
           <Link to="/registration" style={{ color: "inherit", textDecoration: "none"}}>
-            <Button color="inherit" style={{textDecoration: "none"}}>Sign up</Button>
+            <Button color="inherit" style={{textDecoration: "none"}}>Зареєструватися</Button>
           </Link>
         </Toolbar>
       </AppBar>

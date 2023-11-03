@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect, useNavigate} from "react";
 
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -43,8 +43,64 @@ const Registration = () => {
     console.log({
       email: data.get("email"),
       password: data.get("password"),
+      firstName: data.get("firstName"),
+      lastName: data.get("lastName")
     });
   };
+
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [emailDirty, setEmailDirty] = useState(false)
+  const [passwordDirty, setPasswordDirty] = useState(false)
+  const [formValid, setFormValid] = useState(false)
+
+  useEffect(() => {
+      if (emailDirty || passwordDirty) {
+          setFormValid(false)
+      } else {
+          setFormValid(true)
+      }
+  },[emailDirty, passwordDirty])
+
+  const emailHandler = (e) => {
+      setEmail(e.target.value)
+      const re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+      
+      if (!re.test(String(email).toLowerCase())) {
+          setEmailDirty(true)
+      } else {
+          setEmailDirty(false)
+      }
+  }
+
+  const passwordHandler = (e) => {
+      setPassword(e.target.value)
+      if(e.target.value.length < 6 || e.target.value.length > 24){
+          setPasswordDirty(true)
+      } else {
+          setPasswordDirty(false)
+      }
+  }
+
+
+
+
+
+  // const push = useNavigate();
+
+    // const handleLogin = () => {
+
+    //     push('/');
+    // }
+
+
+
+  // const handleSubmit = (event) => {
+  //     event.preventDefault();
+  //     // handleLogin();
+  // };
+
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -62,7 +118,7 @@ const Registration = () => {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign up
+            Реєстрація
           </Typography>
           <Box
             component="form"
@@ -78,7 +134,7 @@ const Registration = () => {
                   required
                   fullWidth
                   id="firstName"
-                  label="First Name"
+                  label="Ім'я"
                   autoFocus
                 />
               </Grid>
@@ -87,7 +143,7 @@ const Registration = () => {
                   required
                   fullWidth
                   id="lastName"
-                  label="Last Name"
+                  label="Прізвище"
                   name="lastName"
                   autoComplete="family-name"
                 />
@@ -97,9 +153,11 @@ const Registration = () => {
                   required
                   fullWidth
                   id="email"
-                  label="Email Address"
+                  label="Електронна адреса"
                   name="email"
                   autoComplete="email"
+                  value={email}
+                  onChange={e => emailHandler(e)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -107,10 +165,12 @@ const Registration = () => {
                   required
                   fullWidth
                   name="password"
-                  label="Password"
+                  label="Пароль"
                   type="password"
                   id="password"
                   autoComplete="new-password"
+                  value={password}
+                  onChange={e => passwordHandler(e)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -128,12 +188,12 @@ const Registration = () => {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign Up
+              Зареєструватися
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link href="#" variant="body2">
-                  Already have an account? Sign in
+                  Вже маєте акаунт? Увійдіть
                 </Link>
               </Grid>
             </Grid>

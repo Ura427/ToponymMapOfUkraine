@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect, useRef} from "react";
 import "./Login.css";
 
 
@@ -34,67 +34,53 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 
+const registeredUsers = {
+  "urakost427@gmail.com": "0677278010",
+  "u@ukr.net": "123"
+}
+
+
 const Login = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+    const email = data.get('email');
+    const pwd = data.get('password');
     console.log({
       email: data.get('email'),
       password: data.get('password'),
     });
+
+    if(registeredUsers[email] !== null && registeredUsers[email] === pwd){
+      console.log("Logged in")
+    }
   };
+
+
+    // const isRegistered = () => {
+    //   if()
+    // }
+
+  const userRef = useRef();
+  const errRef = useRef();
+
+  const [user, setUser] = useState('');
+  const [pwd, setPwd] = useState('');
+  const [errMsg, setErrMsg] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  // useEffect(() => {
+  //   userRef.current.focus();
+  // }, [])
+
+  useEffect(() => {
+    setErrMsg('');
+  }, [user, pwd])
+
 
   return (
 
-    // <div id="body">
-    //   <form>
-    //     <img
-    //       class="mb-4"
-    //       src="/docs/5.3/assets/brand/bootstrap-logo.svg"
-    //       alt=""
-    //       width="72"
-    //       height="57"
-    //     />
-    //     <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
-
-    //     <div class="form-floating">
-    //       <input
-    //         type="email"
-    //         class="form-control"
-    //         id="floatingInput"
-    //         placeholder="name@example.com"
-    //       />
-    //       <label for="floatingInput">Email address</label>
-    //     </div>
-    //     <div class="form-floating">
-    //       <input
-    //         type="password"
-    //         class="form-control"
-    //         id="floatingPassword"
-    //         placeholder="Password"
-    //       />
-    //       <label for="floatingPassword">Password</label>
-    //     </div>
-
-    //     <div class="form-check text-start my-3">
-    //       <input
-    //         class="form-check-input"
-    //         type="checkbox"
-    //         value="remember-me"
-    //         id="flexCheckDefault"
-    //       />
-    //       <label class="form-check-label" for="flexCheckDefault">
-    //         Remember me
-    //       </label>
-    //     </div>
-    //     <button class="btn btn-primary w-100 py-2" type="submit">
-    //       Sign in
-    //     </button>
-    //     <p class="mt-5 mb-3 text-body-secondary">© 2017–2023</p>
-    //   </form>
-    // </div>
-    
     <ThemeProvider theme={defaultTheme}>
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -110,7 +96,7 @@ const Login = () => {
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign in
+          Вхід
         </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
           <TextField
@@ -118,7 +104,7 @@ const Login = () => {
             required
             fullWidth
             id="email"
-            label="Email Address"
+            label="Електронна адреса"
             name="email"
             autoComplete="email"
             autoFocus
@@ -128,32 +114,32 @@ const Login = () => {
             required
             fullWidth
             name="password"
-            label="Password"
+            label="Пароль"
             type="password"
             id="password"
             autoComplete="current-password"
           />
-          <FormControlLabel
+          {/* <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
-          />
+          /> */}
           <Button
             type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign In
+            Увійти
           </Button>
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
-                Forgot password?
+                Забули пароль?
               </Link>
             </Grid>
             <Grid item>
-              <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
+              <Link to="/registration" >
+                <a></a>Не маєте акаунту? Зареєструйтеся
               </Link>
             </Grid>
           </Grid>
