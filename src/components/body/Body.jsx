@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState} from "react";
 import "./Body.css";
 
 import Typography from "@mui/material/Typography";
@@ -7,6 +7,17 @@ import Box from "@mui/material/Box";
 import BodySearch from "../body-search/BodySearch";
 import BodyList from "../body-list/BodyList";
 
+import Fab from '@mui/material/Fab';
+import AddIcon from '@mui/icons-material/Add';
+
+
+import Rating from '@mui/material/Rating';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { styled } from '@mui/material/styles';
+import axios from "axios";
+
+import { Link } from "react-router-dom";
 
 //Modal style
 const style = {
@@ -16,23 +27,37 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
+  // border: "2px solid #000",
   boxShadow: 24,
   p: 4,
 };
 
 
+const StyledRating = styled(Rating)({
+  '& .MuiRating-iconFilled': {
+    color: '#ff6d75',
+  },
+  '& .MuiRating-iconHover': {
+    color: '#ff3d47',
+  },
+});
+
 //Component
-const Body = (place) => {
+const Body = ({isLoggedIn, currUser}) => {
   const [open, setOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState();
   const [modalDescription, setModalDescription] = useState();
 
   const [toponyms, setToponyms] = useState([]);
-  const [currRegion, setCurrRegion] = useState("");
-  const [currToponym, setCurrToponym] = useState("");
+  const [currRegion, setCurrRegion] = useState();
+  const [currToponym, setCurrToponym] = useState();
 
-//useEffect for Modal window
+
+  const [avgRating, setAvgRating] = useState(0);
+  const [currRating, setCurrRating] = useState(0);
+
+
+  //useEffect for Modal window
   useEffect(() => {
     if (currToponym !== "") {
       const toponymDescription = getToponymDescription(currRegion, currToponym);
@@ -41,100 +66,112 @@ const Body = (place) => {
     }
   }, [currToponym, currRegion]);
 
-// console.log("Body: " + currToponym);
 
   //Cut from BodySearch
-const [backendData, setBackendData] = React.useState([]);
-const [toponymsData, setToponymsData] = React.useState([]);
+  const [backendData, setBackendData] = React.useState([]);
+  const [toponymsData, setToponymsData] = React.useState([]);
 
-
-//fetch all backend data
-useEffect(() => {
-  fetch("/api/getAll")
-    .then((response) => response.json())
-    .then((data) => {
-      setBackendData(data);
-    });
-}, []);
-
-  //transforms backend data 
+  //fetch all backend data
   useEffect(() => {
-  if (backendData.length > 0) {
+    fetch("/api/getAll")
+      .then((response) => response.json())
+      .then((data) => {
+        setBackendData(data);
+      });
+  }, []);
 
-    const allToponyms = backendData.flatMap( region => {
-      return region.toponyms.map(toponym => ({
-        regionName: region.name,
-        toponymName: toponym.name,
-        toponymDescription: toponym.description
-      }));
-    })
+  //transforms backend data
+  useEffect(() => {
+    if (backendData.length > 0) {
+      const allToponyms = backendData.flatMap((region) => {
+        return region.toponyms.map((toponym) => ({
+          regionName: region.name,
+          toponymName: toponym.name,
+          toponymDescription: toponym.description,
+        }));
+      });
 
-    setToponymsData(allToponyms.sort((a, b) => {
+      setToponymsData(
+        allToponyms.sort((a, b) => {
           if (a.regionName === b.regionName) {
             return a.toponymName.localeCompare(b.toponymName);
           } else {
             return a.regionName.localeCompare(b.regionName);
           }
-        }));
-  }
-}, [backendData]);
+        })
+      );
+    }
+  }, [backendData]);
 
+console.log("AVG: " + avgRating)
+  useEffect(() => {
+    if(currToponym !== undefined) {
+
+      // const toponym = currToponym
+      axios
+      .post("/rating/getAvgRating", {toponym: currToponym})
+      .then((response) =>{
+        setAvgRating(rating => response.data.roundedAvgRating)
+        console.log("Середню оцінку отримано");
+      })
+      .catch((error) => {
+        if(error.message){
+          console.log("ПОмилка: " + error.message);
+        }
+        console.log("ПОмилка: " + error);
+      })
+    }
+  })
 
 
   //Modal handlers
-  const handleOpen = () => {
+  function handleOpen() {
     setOpen(true);
   };
-  const handleClose = () => {
+  function handleClose() {
     setOpen(false);
   };
 
-  // Database interactions 
-  const getToponymDescription = (region, toponymName) => {
-    const toponym = toponymsData.find(element => element.regionName === region && element.toponymName === toponymName);
+  // Database interactions
+  function getToponymDescription  (region, toponymName) {
+    const toponym = toponymsData.find(
+      (element) =>
+        element.regionName === region && element.toponymName === toponymName
+    );
     if (toponym) {
-      // console.log(toponym);
       return toponym.toponymDescription;
     }
     // Handle the case where the toponym is not found
     return "Toponym not found";
-  }
-  
+  };
+
   //returns a list of toponyms of current region (SHOULD RETURN AN ARRAY OF OBJECTS)
-  const getInfo = (region) => {
-    const toponyms = toponymsData.filter(element => {
+  function getInfo (region) {
+    const toponyms = toponymsData.filter((element) => {
       return element.regionName === region;
-    })
-    // const toponyms2 = toponyms.map(toponym => toponym.toponymName);
+    });
     setToponyms(toponyms);
   };
 
   //Svg handlers
-  const svgClickHandler = (event) => {
+  function svgClickHandler  (event) {
     const target = event.target;
-    // const elementId = target.id;
     const elementName = target.getAttribute("name");
 
     getInfo(elementName);
-    // setCurrRegion(elementId);
     setCurrRegion(elementName); //Sets current region value to clicked svg's name
   };
 
-  const svgHoverHandler = (event) => {
-    // const target = event.target;
-    // const elementId = target.id;
-
+  function svgHoverHandler (event) {
     event.target.style.fill = "pink";
   };
 
-  const svgLeaveHandler = (event) => {
-    // const target = event.target;
-
+  function svgLeaveHandler (event) {
     event.target.style.fill = "#858282";
     document.getElementById("name").style.opacity = 0;
   };
 
-  const svgMoveHandler = (event) => {
+  function svgMoveHandler (event) {
     const target = event.target;
     const nameDiv = document.getElementById("name");
     const nameDivText = document.getElementById("namep");
@@ -148,12 +185,44 @@ useEffect(() => {
     nameDivText.innerText = target.getAttribute("name");
   };
 
-
- const listItemClickHandler = (toponym) => {
+  function listItemClickHandler (toponym) {
     setCurrToponym(toponym);
     handleOpen();
+  };
+
+
+
+ function handleRatingChange(event, value){
+  setCurrRating(prevValue => value);
+  console.log(currRating);
+  if(currRating === null){
+    return
   }
 
+  const object = {
+    region: currRegion,
+    toponym: currToponym,
+    rating: value,
+    user_id: currUser.id
+  }
+
+
+  axios
+  .post("/rating/add", object)
+  .then((response) => {
+    console.log("Додано успішно")
+  })
+  .catch((error) => {
+    if(error.response){
+      console.log("Помилка додавання топоніма: " + error.response.message)
+    }
+    console.log("Помилка додавання топоніма: " + error.message)
+  })
+
+ }
+
+
+ console.log(currToponym)
 
   return (
     <div id="page-body">
@@ -170,12 +239,50 @@ useEffect(() => {
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
             {modalDescription}
           </Typography>
+
+          {isLoggedIn && (
+            <Box sx={{ marginTop: "1rem"}}>
+                  <Typography component="legend">Оцініть достовірність цього топоніма</Typography>
+            <StyledRating
+              name="customized-color"
+              defaultValue={0}
+              getLabelText={(value) => `${value} Heart${value !== 1 ? 's' : ''}`}
+              precision={1}
+              icon={<FavoriteIcon fontSize="inherit" />}
+              emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
+              onChange={(event, value) => 
+                // setCurrRating(value)
+                handleRatingChange(event, value)
+              }
+              value={currRating}
+            />
+            {avgRating !== null ? (
+              <Typography>Середня оцінка: {avgRating}</Typography>
+            ):(
+              <Typography>Ваш відгук буде першим :)</Typography>
+            )}
+      
+            </Box>
+      
+          )
+          }
+         
         </Box>
       </Modal>
+
+
+
+      {currRegion !== "" && toponyms.length > 0 && (
+          <BodyList
+            // sx={{position: "absolute", top: "220px", left: "10px"}}
+            currRegion={currRegion}
+            toponyms={toponyms}
+            listItemClickHandler={listItemClickHandler}
+          />
+        )}
+
+
       <div className="svg-container">
-        {currRegion !== "" && toponyms.length > 0 &&
-        <BodyList currRegion={currRegion} toponyms={toponyms} listItemClickHandler={listItemClickHandler} />
-        }
         <svg
           xmlns="http://www.w3.org/2000/svg"
           baseProfile="tiny"
@@ -208,7 +315,7 @@ useEffect(() => {
             id="Mykolaiv"
             d="M539.1 499.9l-2 3.2-2.5-1.1-1.3-0.3-1.2-0.1-0.8 0.5-0.9 0.9-0.3 0.4-0.2 0.6-0.1 0.8 0.1 2.5-1.3-3.4-0.4-0.5-0.8-0.3-6.5-6.6-0.9-1.9 1.8 1.5 1.5 1.5 0.8 0.5 9.7-0.8 1.9 0.6 3.1 1.9 0.3 0.1z m65.5-117.8l0.6 0.5-0.1 0.5-0.3 0.8-0.4 1.5 0 0.5 0.1 0.3 0.3 0.2 0.6 0 0.3-0.1 0.4 0.1 0.4 0.2 0.5 0.8 0.2 0.5 0 0.3-0.4 0.5-0.1 0.3-0.1 0.4-0.1 1.9-0.1 0.4-0.2 0.5-0.2 1.1 0 4.5 0 0.6 0.2 0.4 0.4 0.3 0.3 0.3 0.3 0.5 0.3 1.1-0.1 0.4-0.2 0.3-2.4 0.2-2.1 0.6-0.3 0.1-0.4 0.4-0.3 0.2 0.1 0.5 0.3 0.8 0.9 1.6 0.4 1 0.3 0.9 0.1 0.8 0 0.5-0.2 0.4-0.3 0.4-0.6 0.7-0.4 0.6-0.1 0.6 0 0.4 0.1 0.2 0.2 0.2 0.4 0.2 4.7 0.7-0.1 0.7-0.1 1 0.1 0.6 0.1 0.5 0.3 0.5 0.8 0.7 0.3 0.3 0.2 0.5 0 0.3-0.4 0.9 0 0.3 0 0.5 0.4 0.8 0.2 0.6 0.2 0.4 0 0.7-0.2 0.6-0.1 0.7 0 0.4 0.1 0.6 0.4 0.9 0 0.6-0.1 0.3-0.2 0.2-0.5 0.2-1.1 0.1-0.6-0.2-0.1-0.2-0.1-0.2-0.3-1.1-0.6-1.2-0.1-0.2-0.2-0.1-0.2 0.1-0.1 0.5-0.2 0.7-0.2 0.4-0.8 1.2-0.3 0.7 0 0.2 0.2 0.5 0.3 0.4 0.4 0.4 0.6 0.2 1.9 0 0.2 0.1 0.3 0.1 0.1 0.2 1.2 2.7 0.2 0.8 0 0.5 0 0.5-0.2 0.7-0.5 1.5-0.3 1-0.1 0.7 0 0.6 0.2 0.5 0.3 0.8 1.2 2.1 0.1 0.3 0 0.2-0.3 0.7-0.2 0.6-0.1 0.3-0.3 0.2-0.4 0-0.3-0.1-0.7-0.4-0.3-0.1-0.3 0.1-0.4 0.2-1.6 1.9-0.3 0.2-0.4 0.2-0.8 0.1-1.3 0-0.1-0.1-0.6-0.7-0.2-0.1-0.3 0.1-0.3 0.4-0.5 1.4-1.4 3.1-1 1.3-0.2 0.6 0.1 0.5 0.1 0.6 0.1 0.8 0.1 0.2 0.2 0.2 0.3 0 0.8-0.1 0.6 0.1 3.2 1.9 2.5 2.4 0.1 0.3 0 0.2-0.2 0.6-0.4 0.7-1 1.1-0.2 0.3-0.1 0.4 0 0.5-0.1 0.1-1.5-1-0.3-0.3-0.3-0.4-0.3-0.4-0.4-0.3-0.5 0.2-0.6 0.5-0.2 0.4-0.1 0.4 0.1 0.9 0 0.6 0.2 0.5 0.4 0.4 0.2 0.1 2 0 0.4 0.2 0.3 0.4 0.1 0.2-0.3 0.4-0.6 0.3-2.2 0.6-0.8 0.4-1.2 1.4-0.5 0.2-5.4 0.9-0.3 0.1-0.3 0.4 0 0.3 0.1 0.3 0.2 0.2 0.4 0.2 0.4 0.2 1.3 0.1 3-0.3 0.4 0.1 0.5 0.3 0.3 0.1 0.5-0.1 0.2 0.1 0.2 0.2-0.6 0.4-0.9 0.5-4.3 1.5-0.5 0.3-0.3 0.1-2.7-0.1-3 0.4-0.6 0-0.4-0.2-0.2-0.2-0.3-0.4-0.4-0.7-0.3-0.4-0.3-0.1-1.2-0.4-0.3-0.2-0.4-0.3-0.4-0.1-2.2 0-0.6-0.1-0.4-0.2-0.2-0.1-0.5-0.1-0.2-0.1-0.4-0.4-0.2-0.1-0.3 0-0.2 0.1-0.1 0.4 0 1.2 0 0.3-0.2 0.7-0.3 0.4-0.3 0.2-0.4 0.1-2 0.2-0.5-0.1-0.4-0.2-0.3-0.8-0.2-0.2-0.2-0.1-0.3 0-1.2 0.1-1.9 0.5-0.4 0.2-0.4 0.5-0.2 0.4-0.7 2-0.1 0.2-0.3 0.2-0.4 0.1-1.5-0.1-3.2-1.2-0.6 0-0.7 0.1-0.4 0.2-0.3 0.2-0.5 0.4-0.2 0.4-0.1 0.4-0.6 1.5-0.5 1-0.2 0.3-0.3 0.4-0.4 0.3-1 0.4-1.7 0.5-0.6 0-0.7-0.2-0.9-0.6-0.6-0.1-0.4 0.1-0.5 0.1-0.9 0.7-0.5 0.5-0.8 0.3-2.8-0.1-0.1 0.4-0.2-0.5-0.6-1.1-0.5-1.4-0.3-3.3 1.1-2.6 1.5-2.3 1.1-2.8 0.3-1.6-0.1-1.3-0.6-0.8-2.7-0.5-0.6-0.7 0.2-1 1.6-2.5 0.5-0.9-0.3-0.6-1.5-0.2-2.5 0.5-1-0.1-0.9-1 1.6-3.4 0.2-2-0.8-2.1-0.8-0.7-0.7-0.2-0.6-0.3-0.4-1.3-0.2-1.5 0-0.9-0.2-0.6-0.8-0.9-3.2-1.5-0.6-1 0.3-1.7-0.1-0.6-0.5-0.2-0.2 0.3-0.8 1.4-0.2 0.5 0.3 0.9 0.9 1 1.1 0.7 2.4 0.6 0.6 1 0 4.7 0.2 0.5 1.4 0.3 0.4 0.4 0.2 0.3 0.3 0.2 0.7 0.6-0.4 1.4-0.8 1.4-0.4 0.5-0.4 3.7 1.7 0.8 2.5-0.4 1.8 0.3-1.6 1.9-0.7 1.3-0.3 1.3 0.5 1.4 1 0.3 1.2-0.4 1.1-0.7 0.3 1.7-0.6 2.4-1 2.2-1.2 0.9-1.3 0.4-1.2 1.2-0.7 1.8 0 2.1 2.1 2.8 0.2 0.6-0.4 3.6 0.2 1.3 0.2 0.7 0.1 0.5-0.5 1-0.4 0.5-1.2 0.9-0.7 0.3-2.4 0.5-2.4-0.4-5.4-2.1-3.3 0.3-0.9 0.6-0.5 1.1-0.5 0.9-1.3 0.2-0.4-0.2-0.8-0.8-0.5-0.1-1.2 0.1-0.6-0.1-0.4-0.3-0.3-1.1 0.6-1.4 3-5.2 0.8-1.7 0-0.8 0.7-0.6 2.5-3.8-0.6-1-0.5 0.4-0.4 1.2-0.4 1-0.4 0.3-1 0.5-0.5 0.3-0.3 0.4-1.1 1.7 0 0.3-0.2 0.2-0.7 0.2-0.7-0.4-0.7-0.7-0.8-2-0.6-1-0.9-0.4 0.6 2.1 0.1 0.5 0.1 1.2 0.4 0.4 0.5 0.3 1.7 1.4 0.2 0.6-0.4 1.1-1 1.6-0.1 0.3-0.9 0.7-1.9 3-0.7 0.7-1 0.2-2.5 1.4-0.8 0.6-0.8-0.4-1.5-0.2-0.7-0.5-0.4 0.6-1.1-0.7-3.8-1-0.8-4.5 0-1.5 0.1-0.4 0.2-0.5-0.1-0.5 0-0.5-0.3-0.8-0.4-6.4-0.1-0.8-1-0.8-0.8-0.4-0.4-0.5-0.6-1.4-0.4-0.7-0.3-0.4-2.4-1.6-0.3-0.6-0.5-1-0.5-1.7 0-0.8 0.1-0.4 0.2 0 2.8-0.2 0.4-0.3 0.6-1 0.2-0.2 0.2-0.1 0.6 0 0.2 0.1 0.4 0.3 0.2 0.1 0.8-0.2 3.4-0.3 0.3 0 0.2-0.2 0.3-0.7 0.2-0.3 0.2-0.1 1.1-0.6 0.3-0.3 0.3-1 0.3-1.2 0.3-0.5 0.3-0.4 0.3-0.3 0.3-0.5 0.1-0.5 0-0.6 0-0.8 0.6-1.4-0.1-0.6-0.1-0.3-0.2-0.2-0.2-0.1-1-0.1-0.3-0.1-0.2-0.2-0.2-0.4-0.1-0.6-0.4-0.7-0.1-0.2-0.6-0.6-0.4-0.6-0.3-0.8-0.2-0.4-0.2-0.2-0.6 0-0.5 0.2-0.7 0.3-0.5 0.1-0.5-0.2-0.6-0.5-0.5-0.3-1.3-0.3-0.3-0.1-0.2-0.3-0.2-0.3-0.1-0.6 0-0.7 0.1-0.7 0.2-0.2 0.5-0.2 0.5-0.2 0.5-0.2 0.2-0.2 0.8-0.8 0.1-0.3 0.2-0.6-0.1-0.7-0.1-0.5-0.4-0.9-0.4-0.4-0.2-0.1-4.4 1-1.7 0.7-0.3 0-0.3-0.1-0.6-1.1-0.2-0.2-0.2 0-2.2-0.1-3.1-0.6-0.7-1.1-0.9-2.1-2.6-7.9-0.3-1.3 0.7-1.8 0.3-1.3 0.2-0.8 0.1-0.8-0.1-0.6 0.1-0.5 0.4-0.3 0.2-0.2 0.2-0.6 0-0.8-0.2-1.7-0.3-0.5-0.8-0.9-0.6-1.1-0.3-0.5-0.4-0.3-1.9-0.1-0.3-0.1 0-0.3 0.1-0.2 0.2-0.5 0-0.6-0.1-1.5-0.2-0.5-0.3-0.3-3.1 0.7-0.2 0.2-0.2 0.2 0 0.4-0.3 1.3-0.3 0.6-0.3 0.4-0.3 0-0.3-0.2-0.2-0.3-0.3-0.6-0.3-1.5-0.2-0.3-0.3-0.2-2-0.1-0.3 0-0.4-0.2-0.7-0.6-0.3-0.1-0.3 0-0.3 0.1-0.5 0.6-0.9 0.6-0.5 0.3-0.2 0-0.3 0-0.3-0.2-0.4-0.5-0.3-0.1-0.3 0-2.5 0.5-0.3-0.1-0.7-0.8-0.2-0.2-1.3-0.7-0.6-0.4-0.3-0.7-0.2-0.8-0.4-1-0.1-0.7 0.1-0.6 0.4-0.8 0.1-0.3 0.1-0.4 0-0.6-0.4-0.6-0.7-0.5-0.7-0.8-0.2-0.3 0-0.4 0.1-0.3 0.2-0.2 0.5-0.6 0.2-0.2 0.2-0.4 0-0.4-0.3-1.2-0.3-0.4-0.3-0.2-1.4-0.6-0.6-0.4-0.9-0.8-0.4-0.7-0.1-0.7-1.4-8.9-0.1-0.3-0.2-0.3-1-1.3-0.6-0.8-0.4-0.5-0.2-0.1-1.4-0.4-0.4-0.2-0.2-0.5 0-0.8 0.1-0.6 0.4-0.7 0.1-0.6-0.1-0.3 0.1-1.1-0.1-0.4-0.1-0.3-0.7-0.5-0.1-0.2 0.1-0.2 0.6-0.6 1.9-0.8 0.9 0.1 0.2-0.1 0.3-0.4 0.2-0.2 0.3 0 0.3 0 0.6 0.2 0.3-0.1 0.2-0.2 0.1-0.4 0-0.4-0.3-0.3-0.7-0.4-0.2-0.2-0.1-0.4 0-1.5 1.6 0.1 0.4-0.1 0.3-0.5 0.4-1.5 0.3-0.3 8.5 0 0.5 0.1 0.5 0 0.4 0.1 2.5 0.9 2.1 0.5 0.6 0 0.3-0.2 0.3-0.4 0.2-0.7 0.1-0.2 0.5-0.3 0.7-0.4 2.6-0.9 0.6-0.1 1.6 0.3 1.7 0 0.7 0.1 0.5 0.2 0.1 0.6 0.2 0.3 0.2 0.3 0.6 0.2 0.3 0 0.2-0.2 0.4-1.1 0.2-0.3 0.2-0.2 0.5-0.4 0.4-0.1 0.3 0.1 0.3 0.1 0.4 0.4 0.1 0.3 0 0.6 0.2 0.3 0.2 0.3 0.8 0.3 0.4 0.1 0.4-0.1 0.4-0.3 0.2-0.2 0.3-0.4 0.4-0.3 1.8-0.6 0.4-0.2 0.2-0.2 0.2-0.6 0.1-0.7 0.5-0.5 0.7-0.4 1.9-0.7 1.2-0.1 4 0.3 0.9 0.3 0.9 0.1 0.5 0.2 0.4 0.1 0.1 0.6 0.2 2.2 0 0.3 0.2 0.2 0.4 0.3 1.3 0.3 0.2 0.2 0.1 0.4 0 1.3 0 0.3 0.1 0.3 0.2 0.4 0.3 0.2 0.6 0.3 5.1 0.7 0.5 0 0.9-0.7 0.9-0.4 0.2 0.1 0.2 0.2 0.2 0.6 0.3 0.2 0.4 0.3 0.4 0.1 0.2-0.1 0.2-0.2 0.5-0.2 0.7-0.2 3.1-0.3 0.4 0.3 0.2 0.4 0.1 0.6-0.2 1.8-0.2 0.6-0.3 0.7 0 0.5 0.3 0.3 0.3 0.1 0.4 0 0.2-0.1 0.2-0.2 0.1-0.6 0.1-1 0.1-0.4 0.2-0.3 0.4-0.3 0.3 0 0.2 0.2 0.2 0.3 0.3 0.1 0.3 0 0.8-0.1 0.5-0.3 0-0.3 0-0.9 0-0.3 0.1-0.3 0.2-0.2 0.3-0.2 0.9-0.4 0.4 0.1 0.2 0.1 0.8 0.9 0.3 0.2 0.5 0.2 0.7-0.1 0.4 0.1 0.4 0.1 0.5 0.4 0.4 0.1 0.3 0.1 2.2-0.5 0.5 0.1 0.3 0.2 0.1 0.2 0.4 1.4 0.3 0.8 0 0.6-0.1 0.7-0.1 0.3-0.4 0.4-0.6 0.5-2.2 1-0.2 0.1 0.1 0.5 0.8 1.4 1.7 3 0.7 0.9 0.7 0.6 0.3 0.1 1.4-0.3 0.3 0.1 0.3 0.1 0.3 0.4 0.2 0.5 0.1 0.9 0.2 0.5 0.2 0.2 1.2 1.5 0.2 0.5 0.1 0.6 0 0.3-0.3 0.5-0.9 1.5-0.3 0.5 0 0.3 0.1 0.6 0.6 0.9 0 0.6-0.1 0.7 0 0.4 0.1 0.4 0.2 0.4 0.3 0.2 0.4 0 4.8 0 0.3-0.1 0.2-0.2 0.2-0.9 0.4-0.2 0.6-0.1 2 0.3 0.4 0.2 0.6 0.6 1.3 0.7 0.2 0.1 0.4 0.5 0.5 0.9 0.2 0.5 0.2 0.4 0.5 0.3 1.1 0.6 0.6 0.2 0.4 0.1 0.6-0.1 0.5-0.2 0.3-0.1 0.3-0.4 0.7-0.9 0.7-1.5 1.2-2 0.3-0.4 0.3-0.2 0.4-0.2 2.1-0.3 0.9 0.2 0.6 0.2 1.5 0.9 1 1 0.2 0.1 0.3-0.1 0.6-0.3 0.6-0.1 0.7 0.1 0.2 0.2 3.7 1.3 0.5 0.1 9.6-1.6 0.3 0 0.1-0.3 0.1-0.2 0-1.3 0-0.3 0.1-0.7 0.1-0.3 0.2-0.1 1.1-0.2 0.2-0.2 0.1-0.2 0-0.2-0.5-0.6-0.1-0.3 0-0.3 0.1-0.7-0.1-0.6-0.4-0.7-0.2-0.5 0.1-0.3 0.2-0.5 0.2-0.1 0.6-0.2 1.5-0.2 0.2 0 0.2-0.2 0.1-0.6 0-0.7-0.1-0.2-0.2-0.1-0.9-0.2-0.3-0.1-0.3-0.4-0.1-0.6 0.1-0.7 0.2-0.6 0.3-0.5 0.2-0.2 0.4-0.3 0.7-0.4 2.3-0.4 1.1-0.4 0.3 0 0.2 0.2 0.6 0.9 0.2 0.2 0.3 0.3 0.6 0.3 0.4 0 0.3-0.1 0.1-0.2 0.4-0.9 0.1-0.3 0.2-0.2 1.7-0.3 0.4-0.3 0.2-0.2 0-0.4-0.2-0.8-0.1-0.6 0.1-0.6 0.1-0.3 0.2-0.3 0.4-0.2 0.7-0.2 0.6 0 1.4 0.3 0.3-0.1 1.2-0.8 0.3 0 0.2 0.1 0.2 0.6 0.1 0.5 0.2 0.6 0.2 0.4 1 1.2 0.2 0.4 0.1 0.5 0 1 0 0.3 0.2 0.2 0.9 0.7z"
             name="Миколаїв"
-        ></path>
+          ></path>
           <path
             onClick={svgClickHandler}
             onMouseMove={svgMoveHandler}
@@ -464,7 +571,24 @@ useEffect(() => {
           <circle cx="77.6" cy="251.3" id="2"></circle>
         </svg>
       </div>
-          <BodySearch sortedSearchOptions={toponymsData} setCurrToponym={setCurrToponym} setCurrRegion={setCurrRegion} handleOpen={handleOpen} />
+      <BodySearch
+        sortedSearchOptions={toponymsData}
+        setCurrToponym={setCurrToponym}
+        setCurrRegion={setCurrRegion}
+        handleOpen={handleOpen}
+      />
+
+      {isLoggedIn && (
+        <Link to="/addToponym">
+           <Fab sx={{ position: "absolute", right: "2rem", bottom: "6rem"}} color="primary" aria-label="add"
+        //  onClick={}
+         >
+           <AddIcon />
+         </Fab>  
+        </Link>
+        
+      )}
+     
     </div>
   );
 };

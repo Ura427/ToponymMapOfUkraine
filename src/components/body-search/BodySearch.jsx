@@ -35,6 +35,8 @@ export default function FreeSolo(props) {
         options={props.sortedSearchOptions.map((option) => option.regionName + " " + option.toponymName)}
         value={selectedOption}
         onChange={handleOptionChange}
+        // onChange={(value) => {console.log(value)}}
+        onMouseOver={(event) => console.log(event.target.innerText)}
         renderInput={(params) => (
           <TextField
             {...params}

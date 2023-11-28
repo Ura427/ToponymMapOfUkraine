@@ -13,15 +13,19 @@ const BodyList = ({ currRegion, toponyms, listItemClickHandler }) => {
   return (
     <Box
       sx={{
-        width: "100%",
+        // width: "100%",
+        minWidth: "20ch",
         maxWidth: 360,
         bgcolor: "background.paper",
         border: "black 1px solid",
+        position: "absolute", top: "220px", left: "10px"
       }}
     >
       <List>
         <ListItem>
-          <ListItemText primary={currRegion} />
+          <ListItemText primary={currRegion} 
+          // sx={{ fontWeight: "bold"}}
+          />
         </ListItem>
       </List>
       <Divider />
