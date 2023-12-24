@@ -8,21 +8,30 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-import Avatar from '@mui/material/Avatar';
-import Stack from '@mui/material/Stack';
-import { deepOrange } from '@mui/material/colors';
+import Avatar from "@mui/material/Avatar";
+import { deepOrange } from "@mui/material/colors";
 
-const Header = ({ isLoggedIn, setIsLoggedIn, currUser, setCurrUser }) => {
-  console.log(isLoggedIn);
-  console.log(currUser);
 
+import { useSelector } from "react-redux";
+import {store} from "../../App.tsx"
+import { authActions } from "../../store/auth.ts";
+import { currUserActions } from "../../store/currUser.ts";
+
+const Header = () => {
+
+  type RootState = ReturnType<typeof store.getState>
+
+   const isLoggedIn = useSelector((state: RootState) => state.auth.value)
+
+  const currUser = useSelector((state: RootState) => state.currUser)
+    console.log(currUser)
 
   const exitClickhandler = () => {
-    setIsLoggedIn(false);
-    setCurrUser({});
-  }
+    store.dispatch(authActions.logout())
+    store.dispatch(currUserActions.setCurrUser(null))
+    window.location.reload();
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -43,21 +52,21 @@ const Header = ({ isLoggedIn, setIsLoggedIn, currUser, setCurrUser }) => {
 
           {isLoggedIn ? (
             <>
-            <Avatar
-            sx={{ bgcolor: deepOrange[500] }}
-            alt="Remy Sharp"
-            src="/broken-image.jpg"
-          >
-            {currUser.firstname[0]}
-          </Avatar>
-              {/* <AccountCircleIcon>
-                {currUser.firstname}
-              </AccountCircleIcon> */}
-
-              <Link
-                style={{ color: "inherit", textDecoration: "none" }}
+              <Avatar
+                sx={{ bgcolor: deepOrange[500] }}
+                alt="Remy Sharp"
+                src="/broken-image.jpg"
               >
-                <Button onClick={exitClickhandler} color="inherit" style={{ textDecoration: "none" }}>
+                {currUser?.firstname && currUser.firstname[0]}
+              </Avatar>
+              <Link 
+                to="/"
+                style={{ color: "inherit", textDecoration: "none" }}>
+                <Button
+                  onClick={exitClickhandler}
+                  color="inherit"
+                  style={{ textDecoration: "none" }}
+                >
                   Вийти
                 </Button>
               </Link>

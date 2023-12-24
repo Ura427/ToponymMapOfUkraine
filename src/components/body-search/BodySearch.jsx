@@ -7,22 +7,29 @@ export default function FreeSolo(props) {
 
   const [selectedOption, setSelectedOption] = React.useState(null);
 
-  
-  // console.log("ALL: " + allToponyms);
-  // console.log("SEARCH: " + searchOptions);
-  // console.log("SORTED: " + sortedSearchOptions);
-  // console.log(selectedOption)
-  // console.log( allToponyms.map((option) => option.regionName))
 
-  const handleOptionChange = (event, newValue) =>{
-    // setSelectedOption(newValue);
+
+  const handleOptionChange = (event, newValue) => {
+    props.setNotProvokeBySearch(false);
     const values = newValue.split(" ");
-    const region = values[0];
-    const toponym = values[1]; 
-    props.setCurrRegion(region);
-    props.setCurrToponym(toponym);
-    props.handleOpen()
+    const region = values[0] + " " + values[1];
+    const toponym = values[2]; 
 
+    const obj = props.sortedSearchOptions.find(o => o.regionName === region) 
+    console.log(obj);
+
+    if(obj){
+      if(obj.toponymName === toponym){
+        props.setCurrRegion(region);
+        props.setCurrToponym(toponym);
+        props.handleOpen();
+        return;
+      }
+      setSelectedOption("Такого топоніма ще немає(");
+      return;
+    }
+   
+    setSelectedOption("Дана область не належить Україні......поки що");
   }
 
   return (
@@ -35,8 +42,7 @@ export default function FreeSolo(props) {
         options={props.sortedSearchOptions.map((option) => option.regionName + " " + option.toponymName)}
         value={selectedOption}
         onChange={handleOptionChange}
-        // onChange={(value) => {console.log(value)}}
-        onMouseOver={(event) => console.log(event.target.innerText)}
+        clearOnBlur
         renderInput={(params) => (
           <TextField
             {...params}

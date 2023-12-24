@@ -17,7 +17,7 @@ const BodyList = ({ currRegion, toponyms, listItemClickHandler }) => {
         minWidth: "20ch",
         maxWidth: 360,
         bgcolor: "background.paper",
-        border: "black 1px solid",
+        border: "#f5f5f5 1px solid",
         position: "absolute", top: "220px", left: "10px"
       }}
     >

@@ -1,5 +1,5 @@
-import React, {useState} from "react";
-import axios from "axios"
+import React, { useState } from "react";
+import axios from "axios";
 
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -15,10 +15,13 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
+import Icon from "react-icons-kit";
+import { basic_eye } from "react-icons-kit/linea/basic_eye";
+import { basic_eye_closed } from "react-icons-kit/linea/basic_eye_closed";
+import { InputAdornment, Input, List, ListItem } from "@mui/material";
 
-import Icon from 'react-icons-kit'
-import {basic_eye} from 'react-icons-kit/linea/basic_eye'
-import {basic_eye_closed} from 'react-icons-kit/linea/basic_eye_closed'
+import validator from "validator";
+import { useNavigate } from "react-router";
 
 function Copyright(props) {
   return (
@@ -38,96 +41,94 @@ function Copyright(props) {
   );
 }
 
-
 const defaultTheme = createTheme();
 
+
+
 const Registration = () => {
-
-  // const [userFirstName, setUserFirstName] = useState('');
-  // const [userLastName, setUserLastName] = useState('');
-  // const [userEmail, setUserEmail] = useState('');
-  // const [userPassword, setUserPassword] = useState('');
-
-
   const [enteredValues, setEnteredValues] = useState({
-    firstName:'',
-    lastName:'',
-    email:'',
-    password:''
-  })
-
-
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
 
   const [didEdit, setDidEdit] = useState({
     firstName: false,
     lastName: false,
     email: false,
-    password: false
-  })
+    password: false,
+  });
 
-  
+  const [type, setType] = useState("password");
 
-  const firstNameIsInvalid = didEdit.firstName && enteredValues.firstName === '';
-  const lastNameIsInvalid = didEdit.lastName && enteredValues.firstName === '';
-  const emailIsInvalid = didEdit.email && !enteredValues.email.includes('@');
-  const passwordIsInvalid = didEdit.password && enteredValues.firstName === '';
+  const regEx = /[a-zA-Z0-9._%+-]+@[a-z0-9-]+\.[a-z]{2,8}(?:\.[a-z]{2,8})?/;
 
-  const invalidData = 
-    firstNameIsInvalid || 
-    lastNameIsInvalid || 
-    emailIsInvalid || 
+
+  const firstNameIsInvalid = 
+    didEdit.firstName && enteredValues.firstName === "";
+  const lastNameIsInvalid = 
+    didEdit.lastName && enteredValues.firstName === "";
+  const emailIsInvalid = 
+    didEdit.email && (!regEx.test(enteredValues.email) || enteredValues.email === "")
+  const passwordIsInvalid = 
+    didEdit.password && (!validator.isStrongPassword(enteredValues.password, {
+      minLength: 8, minLowercase: 1, minUppercase: 1,
+      minNumbers: 1, minSymbols: 1
+    }));
+
+  const invalidData =
+    firstNameIsInvalid ||
+    lastNameIsInvalid ||
+    emailIsInvalid ||
     passwordIsInvalid ||
-    enteredValues.firstName === '' ||
-    enteredValues.lastName === '' ||
-    enteredValues.email === '' ||
-    enteredValues.password === '' 
-    ;
+    enteredValues.firstName === "" ||
+    enteredValues.lastName === "" ||
+    enteredValues.email === "" ||
+    enteredValues.password === "";
+
+
+    const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-      firstName: data.get("firstName"),
-      lastName: data.get("lastName")
-    });
+    // const data = new FormData(event.currentTarget);
+    // console.log({
+    //   email: data.get("email"),
+    //   password: data.get("password"),
+    //   firstName: data.get("firstName"),
+    //   lastName: data.get("lastName"),
+    // });
   };
 
-  const handleInputChange = (identifier, value) => { 
+  const handleInputChange = (identifier, value) => {
     //Змінює значення реєстраційного стану
     setEnteredValues((prevValues) => ({
       ...prevValues,
-      [identifier]: value
-    }))
-    
-    
-    setDidEdit(prevEdit => ({
+      [identifier]: value,
+    }));
+
+    setDidEdit((prevEdit) => ({
       ...prevEdit,
-      [identifier]: false
-    }))
-  }
+      [identifier]: false,
+    }));
+  };
 
-
-
-  const handleInputBlur= (identifier) => {
-    setDidEdit(prevEdit => ({
+  const handleInputBlur = (identifier) => {
+    setDidEdit((prevEdit) => ({
       ...prevEdit,
-      [identifier]: true
-    }))
-  }
+      [identifier]: true,
+    }));
+  };
 
 
-  console.log(didEdit)
-  console.log(invalidData)
 
-
-  const handleRegistration = () => {
+  function handleRegistration(){
     // Відправляйте дані реєстрації на сервер
     // Створіть об'єкт з даними для реєстрації
 
-    if(invalidData){
-      console.log("Invalid data")
+    if (invalidData) {
+      console.log("Invalid data");
       return;
     }
 
@@ -143,36 +144,23 @@ const Registration = () => {
     };
 
     // Відправте POST-запит на сервер
-    axios.post('/register', userData)
-      .then(response => {
+    axios
+      .post("/register", userData)
+      .then((response) => {
         // Обробка успішної реєстрації, наприклад, перенаправлення на сторінку входу
-        console.log('Реєстрація пройшла успішно');
+        console.log("Реєстрація пройшла успішно");
+        navigate("/")
       })
-      
-      .catch(error => {
+
+      .catch((error) => {
         // Обробка помилок реєстрації, наприклад, виведення повідомлення про помилку
         if (error.response) {
-          console.error('Помилка реєстрації:', error.response.data.message);
+          console.error("Помилка реєстрації:", error.response.data.message);
         } else {
-          console.error('Помилка реєстрації:', error.message);
+          console.error("Помилка реєстрації:", error.message);
         }
       });
   };
-
-
-
-
-  const [type, setType] = useState("password");
-
-  // const [ lowerValidated, setLowerValidated] = useState(false)
-  // const [ upperValidated, setUpperValidated] = useState(false)
-  // const [ numberValidated, setNumberValidated] = useState(false)
-  // const [ specialValidated, setSpecialValidated] = useState(false)
-  // const [ lengthValidated, setLengthValidated] = useState(false)
-
-
-
-
 
 
   return (
@@ -202,7 +190,7 @@ const Registration = () => {
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
-                type="email"
+                  type="email"
                   autoComplete="given-name"
                   name="firstName"
                   required
@@ -210,13 +198,19 @@ const Registration = () => {
                   id="firstName"
                   label="Ім'я"
                   autoFocus
-                  // value={userFirstName}
-                  // onChange={e => setUserFirstName(e.target.value)}
                   value={enteredValues.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  onBlur={() => handleInputBlur('firstName')}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
+                  onBlur={() => handleInputBlur("firstName")}
                 />
-                <Box>{firstNameIsInvalid && <Typography style={{color: 'red'}}>Введіть ім'я</Typography>}</Box>
+                <Box>
+                  {firstNameIsInvalid && (
+                    <Typography style={{ color: "red" }}>
+                      Введіть ім'я
+                    </Typography>
+                  )}
+                </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -228,10 +222,18 @@ const Registration = () => {
                   autoComplete="family-name"
                   value={enteredValues.lastName}
                   // onChange={e => setUserLastName(e.target.value)}
-                  onChange={e => handleInputChange('lastName', e.target.value)}
-                  onBlur={() => handleInputBlur('lastName')}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
+                  onBlur={() => handleInputBlur("lastName")}
                 />
-                <Box>{lastNameIsInvalid && <Typography style={{color: 'red'}}>Введіть прізвище</Typography>}</Box>
+                <Box>
+                  {lastNameIsInvalid && (
+                    <Typography style={{ color: "red" }}>
+                      Введіть прізвище
+                    </Typography>
+                  )}
+                </Box>
               </Grid>
               <Grid item xs={12}>
                 <TextField
@@ -242,14 +244,31 @@ const Registration = () => {
                   name="email"
                   autoComplete="email"
                   type="email"
-                  // value={userEmail}
-                  // onChange={e => setUserEmail(e.target.value)}
                   value={enteredValues.email}
                   onChange={e => handleInputChange('email', e.target.value)}
-                  onBlur={() => handleInputBlur('email')}
+                  // onChange={(e) => emailValidation(e.target.value)}
+                  onBlur={() => handleInputBlur("email")}
                 />
-                <Box>{emailIsInvalid && <Typography style={{color: 'red'}}>Введіть існуючу email адресу</Typography>}</Box>
+                <Box>
+                  {emailIsInvalid && (
+                    <Typography style={{ color: "red" }}>
+                      Введіть існуючу email адресу
+                    </Typography>
+                  )}
+                </Box>
               </Grid>
+
+
+              <Grid item xs={12} style={{ fontSize: "0.6rem"}}>
+                  <Typography style={{ fontSize: "0.7rem"}}>Пароль повинен містити:</Typography>
+                  <List>
+                      <ListItem>Мінімум 8 символів</ListItem>
+                      <ListItem>Мінімум 1 символ нижнього регістру</ListItem>
+                      <ListItem>Мінімум 1 символ верхнього регістру</ListItem>
+                      <ListItem>Мінімум 1 цифру</ListItem>
+                      <ListItem>Мінімум 1 спеціальний символ(@#$%^&&)</ListItem>
+                  </List>
+                </Grid>
               <Grid item xs={12}>
                 <TextField
                   required
@@ -261,36 +280,38 @@ const Registration = () => {
                   id="password"
                   autoComplete="new-password"
                   value={enteredValues.password}
-                  // onChange={e => setUserPassword(e.target.value)}
-                  onChange={e => handleInputChange('password', e.target.value)}
-                  onBlur={ () => handleInputBlur("password")}
-                  
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
+                  onBlur={() => handleInputBlur("password")}
                 />
-                {type === 'password' ? (
-                  <span style={{cursor: "pointer"}}
-                  onClick={() => setType("text")}>
-                    <Icon icon={basic_eye_closed} size={18}/>
+                {type === "password" ? (
+                  <span
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setType("text")}
+                  >
+                    <Icon icon={basic_eye_closed} size={18} />
                   </span>
-                ):(
-                  <span style={{cursor: "pointer"}}
-                  onClick={() => setType("password")}>
-                    <Icon icon={basic_eye} size={18}/>
+                ) : (
+                  <span
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setType("password")}
+                  >
+                    <Icon icon={basic_eye} size={18} />
                   </span>
                 )}
-                <Box>{passwordIsInvalid && <Typography style={{color: 'red'}}>Введіть існуючу email адресу</Typography>}</Box>
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox value="allowExtraEmails" color="primary" />
-                  }
-                  label="I want to receive inspiration, marketing promotions and updates via email."
-                />
+                <Box>
+                  {passwordIsInvalid && (
+                    <Typography style={{ color: "red" }}>
+                      Введіть правильний пароль
+                    </Typography>
+                  )}
+                </Box>
+               
               </Grid>
             </Grid>
             <Button
-              
-              disabled = {invalidData}
+              disabled={invalidData}
               type="submit"
               fullWidth
               variant="contained"
