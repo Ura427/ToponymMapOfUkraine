@@ -1,6 +1,7 @@
 import React from "react";
+import { currDataStore, currRegionActions } from "../body/store/currData.ts";
 
-function SvgMap({ height, setCurrRegion, getInfo, toponymsData, setToponyms, setNotProvokeBySearch }) {
+function SvgMap({ height, getInfo, toponymsData, setToponyms, setNotProvokeBySearch }) {
 //   function getInfo(region) {
 //     const toponyms = toponymsData.filter((element) => {
 //       return element.regionName === region;
@@ -22,7 +23,8 @@ function SvgMap({ height, setCurrRegion, getInfo, toponymsData, setToponyms, set
         console.log("Ok")
       getInfo(elementName);
     }
-    setCurrRegion(elementName); //Sets current region value to clicked svg's name
+    // setCurrRegion(elementName); //Sets current region value to clicked svg's name
+    currDataStore.dispatch(currRegionActions.setCurrRegion(elementName))
   }
 
   function svgHoverHandler(event) {
