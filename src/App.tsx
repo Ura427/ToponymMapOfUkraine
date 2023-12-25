@@ -10,22 +10,15 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./store/auth.ts";
 import currUserReducer from "./store/currUser.ts";
 
-
-export const store = configureStore({
-  reducer: { auth: authReducer, currUser: currUserReducer}
-})
- 
-
-
+export const appStore = configureStore({
+  reducer: { auth: authReducer, currUser: currUserReducer },
+});
 
 function App() {
   return (
     <div>
       <Routes>
-        <Route
-          path="/"
-          element={<HomePage />}
-        />
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registration" element={<Registration />} />
         <Route path="/addToponym" element={<AddToponym />} />
