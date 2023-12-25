@@ -12,24 +12,22 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Avatar from "@mui/material/Avatar";
 import { deepOrange } from "@mui/material/colors";
 
-
 import { useSelector } from "react-redux";
-import {store} from "../../App.tsx"
+import { appStore } from "../../App.tsx";
 import { authActions } from "../../store/auth.ts";
 import { currUserActions } from "../../store/currUser.ts";
 
 const Header = () => {
+  type RootState = ReturnType<typeof appStore.getState>;
 
-  type RootState = ReturnType<typeof store.getState>
+  const isLoggedIn = useSelector((state: RootState) => state.auth.value);
 
-   const isLoggedIn = useSelector((state: RootState) => state.auth.value)
-
-  const currUser = useSelector((state: RootState) => state.currUser)
-    console.log(currUser)
+  const currUser = useSelector((state: RootState) => state.currUser);
+  console.log(currUser);
 
   const exitClickhandler = () => {
-    store.dispatch(authActions.logout())
-    store.dispatch(currUserActions.setCurrUser(null))
+    appStore.dispatch(authActions.logout());
+    appStore.dispatch(currUserActions.setCurrUser(null));
     window.location.reload();
   };
 
@@ -59,9 +57,7 @@ const Header = () => {
               >
                 {currUser?.firstname && currUser.firstname[0]}
               </Avatar>
-              <Link 
-                to="/"
-                style={{ color: "inherit", textDecoration: "none" }}>
+              <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
                 <Button
                   onClick={exitClickhandler}
                   color="inherit"
