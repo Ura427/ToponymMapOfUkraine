@@ -16,8 +16,7 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
-
-import {store} from "../../App.tsx"
+import { appStore } from "../../App.tsx";
 import { currUserActions } from "../../store/currUser.ts";
 import { authActions } from "../../store/auth.ts";
 
@@ -50,7 +49,6 @@ function Login() {
     email: false,
     password: false,
   });
-
 
   const navigate = useNavigate();
 
@@ -98,8 +96,8 @@ function Login() {
       .post("/login", userData)
       .then((response) => {
         console.log("Вхід успішний");
-        store.dispatch(authActions.login())
-        store.dispatch(currUserActions.setCurrUser(response.data.user));
+        appStore.dispatch(authActions.login());
+        appStore.dispatch(currUserActions.setCurrUser(response.data.user));
         navigate("/");
       })
       .catch((error) => {
