@@ -10,80 +10,70 @@ import BodyList from "../body-list/BodyList.jsx";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 
-import Rating from "@mui/material/Rating";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { styled } from "@mui/material/styles";
+
 import axios from "axios";
 
 import { Link } from "react-router-dom";
 import SvgMap from "../svgMap/SvgMap.jsx";
 
-// import { authStore } from "../../App.tsx";
-
-// import { userStore } from "../../App.tsx";
-
-import { store } from "../../App.tsx"
+import { appStore } from "../../App.tsx";
 import { authActions } from "../../store/auth.ts";
 import { currUserActions } from "../../store/currUser.js";
 import { useSelector } from "react-redux";
 // import { RootState } from 'app/redux/store';
 
-//Modal style
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  boxShadow: 24,
-  p: 4,
-};
 
-const StyledRating = styled(Rating)({
-  "& .MuiRating-iconFilled": {
-    color: "#ff6d75",
-  },
-  "& .MuiRating-iconHover": {
-    color: "#ff3d47",
-  },
-});
+import { modalDescActions, modalOpenActions, modalStore, modalTitleActions } from "../modal/store/modal.ts";
+
+
+import ModalWindow from "../modal/ModalWindow.tsx"
+
+
+import { avgRatingActions } from "./store/rating.ts";
+import { currRatingActions } from "./store/rating.ts";
+
+import { ratingStore } from "./store/rating.ts";
+import { currDataStore, currToponymActions } from "./store/currData.ts";
 
 //Component
 const Body = () => {
-  const [open, setOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState<string | undefined>();
-  const [modalDescription, setModalDescription] = useState<string | undefined>();
+  // const [open, setOpen] = useState(false);
+  // const [modalTitle, setModalTitle] = useState<string | undefined>();
+  // const [modalDescription, setModalDescription] = useState<
+  //   string | undefined
+  // >();
 
   const [toponyms, setToponyms] = useState<Array<Toponym>>([]);
-  const [currRegion, setCurrRegion] = useState<string | undefined>();
-  const [currToponym, setCurrToponym] = useState<string | undefined>();
-  const [avgRating, setAvgRating] = useState<number>(0);
-  const [currRating, setCurrRating] = useState<number>(0);
+  // const [currRegion, setCurrRegion] = useState<string | undefined>();
+  // const [currToponym, setCurrToponym] = useState<string | undefined>();
+  // const [avgRating, setAvgRating] = useState<number>(0);
+  // const [currRating, setCurrRating] = useState<number>(0);
 
   const [notProvokeBySearch, setNotProvokeBySearch] = useState<boolean>(true);
 
-  // const isLoggedIn = authStore.getState().value;
-  // const currUser = userStore.getState();
+  // type RootState = ReturnType<typeof appStore.getState>;
 
-  type RootState = ReturnType<typeof store.getState>
+  const isLoggedIn = useSelector((state: any) => state.auth.value);
 
-  const isLoggedIn = useSelector((state: RootState) => state.auth.value) 
-  console.log(isLoggedIn)
+  // const currUser = useSelector((state: any) => state.currUser);
 
 
-  const currUser = useSelector((state: RootState) => state.currUser);
-  console.log(currUser)
+  // const avgRating = useSelector((state: any) => state.avgRating.value)
+
+  // const currRating = useSelector((state: any) => state.currRating.value)
 
 
-  
+  const currToponym = useSelector((state: any) => state.currToponym);
+  const currRegion = useSelector((state: any) => state.currRegion)
+
   //useEffect for Modal window
   useEffect(() => {
     if (currToponym !== "") {
       const toponymDescription = getToponymDescription(currRegion, currToponym);
-      setModalTitle(currToponym);
-      setModalDescription(toponymDescription);
+      // setModalTitle(currToponym);
+      modalStore.dispatch(modalTitleActions.setTitle(currToponym))
+      // setModalDescription(toponymDescription);
+      modalStore.dispatch(modalDescActions.setDesc(toponymDescription));
     }
   }, [currToponym, currRegion]);
 
@@ -101,15 +91,15 @@ const Body = () => {
   }, []);
 
   type Toponym = {
-    name: string,
-    description: string
-  }
+    name: string;
+    description: string;
+  };
 
   type Region = {
-    id: string,
-    region: string,
-    toponyms: Toponym[]
-  }
+    id: string;
+    region: string;
+    toponyms: Toponym[];
+  };
 
   //transforms backend data
   useEffect(() => {
@@ -134,13 +124,13 @@ const Body = () => {
     }
   }, [backendData]);
 
-
   useEffect(() => {
     if (currToponym !== undefined) {
       axios
         .post("/rating/getAvgRating", { toponym: currToponym })
         .then((response) => {
-          setAvgRating((rating) => response.data.roundedAvgRating);
+          // setAvgRating((rating) => response.data.roundedAvgRating);
+          ratingStore.dispatch(avgRatingActions.setAvgRating(response.data.roundedAvgRating));
           console.log("Середню оцінку отримано");
         })
         .catch((error) => {
@@ -154,11 +144,14 @@ const Body = () => {
 
   //Modal handlers
   function handleOpen() {
-    setOpen(true);
+    // setOpen(true);
+    modalStore.dispatch(modalOpenActions.setActive());
   }
   function handleClose() {
-    setOpen(false);
-    setCurrRating(0);
+    // setOpen(false);
+    modalStore.dispatch(modalOpenActions.setDisabled());
+    // setCurrRating(0);
+    ratingStore.dispatch(currRatingActions.setCurrRating(0));
   }
 
   // Database interactions
@@ -183,82 +176,16 @@ const Body = () => {
   }
 
   function listItemClickHandler(toponym) {
-    setCurrToponym(toponym);
+    // setCurrToponym(toponym);
+    currDataStore.dispatch(currToponymActions.setCurrToponym(toponym));
     handleOpen();
   }
 
-  function handleRatingChange(event, value) {
-    setCurrRating((prevValue) => value);
-    if (currRating === null) {
-      return;
-    }
-
-    const object = {
-      region: currRegion,
-      toponym: currToponym,
-      rating: value,
-      user_id: currUser.id,
-    };
-
-    axios
-      .post("/rating/add", object)
-      .then((response) => {
-        console.log("Додано успішно");
-      })
-      .catch((error) => {
-        if (error.response) {
-          console.log("Помилка додавання топоніма: " + error.response.message);
-        }
-        console.log("Помилка додавання топоніма: " + error.message);
-      });
-  }
-
-
+ 
   return (
     <div id="page-body">
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            {modalTitle}
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            {modalDescription}
-          </Typography>
 
-          {isLoggedIn && (
-            <Box sx={{ marginTop: "1rem" }}>
-              <Typography component="legend">
-                Оцініть достовірність цього топоніма
-              </Typography>
-              <StyledRating
-                name="customized-color"
-                defaultValue={0}
-                getLabelText={(value) =>
-                  `${value} Heart${value !== 1 ? "s" : ""}`
-                }
-                precision={1}
-                icon={<FavoriteIcon fontSize="inherit" />}
-                emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
-                onChange={(event, value) =>
-                  // setCurrRating(value)
-                  handleRatingChange(event, value)
-                }
-                value={currRating}
-              />
-              {avgRating !== null ? (
-                <Typography>Середня оцінка: {avgRating}</Typography>
-              ) : (
-                <Typography>Ваш відгук буде першим :)</Typography>
-              )}
-            </Box>
-          )}
-        </Box>
-      </Modal>
+      <ModalWindow />
 
       {currRegion !== "" && toponyms.length > 0 && notProvokeBySearch && (
         <BodyList
@@ -272,20 +199,20 @@ const Body = () => {
       <div className="svg-container">
         <SvgMap
           height="650px"
-          setCurrRegion={setCurrRegion}
+          // setCurrRegion={setCurrRegion}
           getInfo={getInfo}
           toponymsData={toponymsData}
           setToponyms={setToponyms}
           setNotProvokeBySearch={setNotProvokeBySearch}
         />
       </div>
-      <BodySearch
+      {/* <BodySearch
         sortedSearchOptions={toponymsData}
         setCurrToponym={setCurrToponym}
         setCurrRegion={setCurrRegion}
         handleOpen={handleOpen}
         setNotProvokeBySearch={setNotProvokeBySearch}
-      />
+      /> */}
 
       {isLoggedIn && (
         <Link to="/addToponym">
