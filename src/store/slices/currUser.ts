@@ -43,6 +43,6 @@ type User = {
     },
   });
   
-  export const currUserActions = currUser.actions;
 
-export default currUser.reducer
+export const currUserActions = currUser.actions;
+export const currUserReducer =  currUser.reducer
