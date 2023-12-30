@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
@@ -7,9 +7,13 @@ import ListItemButton from "@mui/material/ListItemButton";
 
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
+import { RegionContext } from "../../store/context/regionContext";
 
-const BodyList = ({ currRegion, toponyms, listItemClickHandler }) => {
-  // console.log(toponyms);
+const BodyList = ({ toponyms, listItemClickHandler }) => {
+
+
+  const region = useContext(RegionContext);
+
   return (
     <Box
       sx={{
@@ -18,14 +22,14 @@ const BodyList = ({ currRegion, toponyms, listItemClickHandler }) => {
         maxWidth: 360,
         bgcolor: "background.paper",
         border: "#f5f5f5 1px solid",
-        position: "absolute", top: "220px", left: "10px"
+        position: "absolute",
+        top: "220px",
+        left: "10px",
       }}
     >
       <List>
         <ListItem>
-          <ListItemText primary={currRegion} 
-          // sx={{ fontWeight: "bold"}}
-          />
+          <ListItemText primary={region.value} />
         </ListItem>
       </List>
       <Divider />
