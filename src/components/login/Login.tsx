@@ -16,9 +16,10 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
-import { appStore } from "../../App.tsx";
-import { currUserActions } from "../../store/currUser.ts";
-import { authActions } from "../../store/auth.ts";
+import { store } from "../../store/store.js";
+import { currUserActions } from "../../store/slices/currUser.ts";
+import { login } from "../../store/slices/auth.ts";
+import { useDispatch } from "react-redux";
 
 function Copyright(props) {
   return (
@@ -51,6 +52,7 @@ function Login() {
   });
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const validateEmail = (email) => {
     // setIsValidEmail(email.includes("@") && email.length >= 3);
@@ -96,8 +98,8 @@ function Login() {
       .post("/login", userData)
       .then((response) => {
         console.log("Вхід успішний");
-        appStore.dispatch(authActions.login());
-        appStore.dispatch(currUserActions.setCurrUser(response.data.user));
+        dispatch(login());
+        dispatch(currUserActions.setCurrUser(response.data.user));
         navigate("/");
       })
       .catch((error) => {
