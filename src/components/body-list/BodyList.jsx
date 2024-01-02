@@ -9,10 +9,12 @@ import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import { RegionContext } from "../../store/context/regionContext";
 
+
 const BodyList = ({ toponyms, listItemClickHandler }) => {
 
 
   const region = useContext(RegionContext);
+ 
 
   return (
     <Box
