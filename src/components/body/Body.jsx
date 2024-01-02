@@ -1,79 +1,83 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+//Essential and hooks
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import axios from "axios";
+import { Link } from "react-router-dom";
+
+//Styles
 import "./Body.css";
 
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
-import Box from "@mui/material/Box";
+
+//MUI
 import BodySearch from "../body-search/BodySearch.jsx";
 import BodyList from "../body-list/BodyList.jsx";
-
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 
-import axios from "axios";
 
-import { Link } from "react-router-dom";
+//Custom components
 import SvgMap from "../svgMap/SvgMap.jsx";
+import ModalWindow from "../modal/ModalWindow";
 
-import { store } from "../../store/store.ts";
-import { useSelector } from "react-redux";
+//Redux
+// import { store } from "../../store/store.ts";
+// import {
+//   modalDescActions,
+//   modalOpenActions,
+//   modalStore,
+//   modalTitleActions,
+// } from "../../store/slices/modal.ts";
+// import { avgRatingActions } from "../../store/slices/rating.ts";
+// import { currRatingActions } from "../../store/slices/rating.ts";
+// import { ratingStore } from "../../store/slices/rating.ts";
+// import {
+//   currDataStore,
+//   currToponymActions,
+// } from "../../store/slices/currData.ts";
 
-import {
-  modalDescActions,
-  modalOpenActions,
-  modalStore,
-  modalTitleActions,
-} from "../../store/slices/modal.ts";
-
-import ModalWindow from "../modal/ModalWindow.tsx";
-
-import { avgRatingActions } from "../../store/slices/rating.ts";
-import { currRatingActions } from "../../store/slices/rating.ts";
-
-import { ratingStore } from "../../store/slices/rating.ts";
-import {
-  currDataStore,
-  currToponymActions,
-} from "../../store/slices/currData.ts";
-
-
-
+//Context
 import { RegionContext } from "../../store/context/regionContext.js";
+import { ToponymContext } from "../../store/context/toponymContext.js";
+import { ModalContext } from "../../store/context/modalContext.js";
 
 //Component
 const Body = () => {
   const [currRegion, setCurrRegion] = useState();
+  const [currToponym, setCurrToponym] = useState();
+  const [modalData, setModalData] = useState({
+    open: false,
+    title: null,
+    desc: null
+  });
 
-  // const [toponyms, setToponyms] = useState<Array<Toponym>>([]);
   const [toponyms, setToponyms] = useState([]);
-
-  // const [notProvokeBySearch, setNotProvokeBySearch] = useState<boolean>(true);
   const [notProvokeBySearch, setNotProvokeBySearch] = useState(true);
-
-  // type RootState = ReturnType<typeof appStore.getState>;
-
   const isLoggedIn = useSelector((state) => state.auth.value);
-
-  const currToponym = useSelector((state) => state.currToponym);
-
-  console.log("currRegion: " + currRegion);
-  console.log("toponyms: " + JSON.stringify(toponyms));
-
-  //useEffect for Modal window
-  useEffect(() => {
-    if (currToponym !== "") {
-      const toponymDescription = getToponymDescription(currRegion, currToponym);
-      modalStore.dispatch(modalTitleActions.setTitle(currToponym));
-      modalStore.dispatch(modalDescActions.setDesc(toponymDescription));
-    }
-  }, [currToponym, currRegion]);
-
-  //Cut from BodySearch
-  // const [backendData, setBackendData] = useState<Array<any>>([]);
-  // const [toponymsData, setToponymsData] = useState<Array<any>>([]);
 
   const [backendData, setBackendData] = useState([]);
   const [toponymsData, setToponymsData] = useState([]);
+
+
+  //Set Modal Data
+  useEffect(() => {
+    setModalData2();
+    isLoggedIn && getAvgRating();
+  },[currToponym, currRegion])
+
+
+  function setModalData2 () {
+    if (currToponym !== "") {
+      const toponymDescription = getToponymDescription(currRegion, currToponym);
+      setModalData((prevState) => ({
+        ...prevState,
+        title: currToponym,
+        desc: toponymDescription
+      }))
+      // modalStore.dispatch(modalTitleActions.setTitle(currToponym));
+      // modalStore.dispatch(modalDescActions.setDesc(toponymDescription));
+    }
+  }
+
 
   //fetch all backend data
   useEffect(() => {
@@ -82,20 +86,10 @@ const Body = () => {
       .then((data) => {
         setBackendData(data);
       });
+      // backendDataTransform();
   }, []);
 
-  // type Toponym = {
-  //   name: string;
-  //   description: string;
-  // };
-
-  // type Region = {
-  //   id: string;
-  //   region: string;
-  //   toponyms: Toponym[];
-  // };
-
-  //transforms backend data
+  
   useEffect(() => {
     if (backendData.length > 0) {
       const allToponyms = backendData.flatMap((region) => {
@@ -116,9 +110,31 @@ const Body = () => {
         })
       );
     }
-  }, [backendData]);
+  })
+  function backendDataTransform() {
+    if (backendData.length > 0) {
+      const allToponyms = backendData.flatMap((region) => {
+        return region.toponyms.map((toponym) => ({
+          regionName: region.name,
+          toponymName: toponym.name,
+          toponymDescription: toponym.description,
+        }));
+      });
 
-  useEffect(() => {
+      setToponymsData(
+        allToponyms.sort((a, b) => {
+          if (a.regionName === b.regionName) {
+            return a.toponymName.localeCompare(b.toponymName);
+          } else {
+            return a.regionName.localeCompare(b.regionName);
+          }
+        })
+      );
+    }
+  }
+
+
+  function getAvgRating() {
     if (currToponym !== undefined) {
       axios
         .post("/rating/getAvgRating", { toponym: currToponym })
@@ -136,19 +152,20 @@ const Body = () => {
           console.log("ПОмилка: " + error);
         });
     }
-  });
+  }
 
   //Modal handlers
   function handleOpen() {
-    // setOpen(true);
-    modalStore.dispatch(modalOpenActions.setActive());
+    // modalStore.dispatch(modalOpenActions.setActive());
+    setModalData((prevState) => ({
+      ...prevState,
+      open: true
+    }))
   }
-  function handleClose() {
-    // setOpen(false);
-    modalStore.dispatch(modalOpenActions.setDisabled());
-    // setCurrRating(0);
-    ratingStore.dispatch(currRatingActions.setCurrRating(0));
-  }
+  // function handleClose() {
+  //   modalStore.dispatch(modalOpenActions.setDisabled());
+  //   ratingStore.dispatch(currRatingActions.setCurrRating(0));
+  // }
 
   // Database interactions
   function getToponymDescription(region, toponymName) {
@@ -172,8 +189,8 @@ const Body = () => {
   }
 
   function listItemClickHandler(toponym) {
-    // setCurrToponym(toponym);
-    currDataStore.dispatch(currToponymActions.setCurrToponym(toponym));
+    // currDataStore.dispatch(currToponymActions.setCurrToponym(toponym));
+    setCurrToponym(toponym)
     handleOpen();
   }
 
@@ -183,15 +200,27 @@ const Body = () => {
     setValue: setCurrRegion
   }
 
+  const toponymCtx = {
+    value: currToponym,
+    setValue: setCurrToponym
+  }
+
+  const modalCtx = {
+    value: modalData,
+    setValue: setModalData
+  }
+
   return (
     <div id="page-body">
       <RegionContext.Provider value={regionCtx}>
-        <ModalWindow />
+       <ToponymContext.Provider value={toponymCtx}>
+        <ModalContext.Provider value={modalCtx}>
+        
+        
+        <ModalWindow/>
 
         {currRegion !== "" && toponyms.length > 0 && notProvokeBySearch && (
           <BodyList
-            // sx={{position: "absolute", top: "220px", left: "10px"}}
-            // currRegion={currRegion}
             toponyms={toponyms}
             listItemClickHandler={listItemClickHandler}
           />
@@ -200,22 +229,20 @@ const Body = () => {
         <div className="svg-container">
           <SvgMap
             height="650px"
-            // setCurrRegion={setCurrRegion}
             getInfo={getInfo}
             toponymsData={toponymsData}
             setToponyms={setToponyms}
             setNotProvokeBySearch={setNotProvokeBySearch}
           />
         </div>
-      </RegionContext.Provider>
+     
+      
 
-      {/* <BodySearch
+      <BodySearch
         sortedSearchOptions={toponymsData}
-        setCurrToponym={setCurrToponym}
-        setCurrRegion={setCurrRegion}
         handleOpen={handleOpen}
         setNotProvokeBySearch={setNotProvokeBySearch}
-      /> */}
+      />
 
       {isLoggedIn && (
         <Link to="/addToponym">
@@ -228,7 +255,12 @@ const Body = () => {
           </Fab>
         </Link>
       )}
+
+        </ModalContext.Provider>
+      </ToponymContext.Provider> 
+    </RegionContext.Provider>
     </div>
+    
   );
 };
 
