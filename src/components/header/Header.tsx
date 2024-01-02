@@ -12,22 +12,25 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Avatar from "@mui/material/Avatar";
 import { deepOrange } from "@mui/material/colors";
 
-import { useSelector } from "react-redux";
-import { appStore } from "../../App.tsx";
-import { authActions } from "../../store/auth.ts";
-import { currUserActions } from "../../store/currUser.ts";
+import { useDispatch, useSelector } from "react-redux";
+import { store } from "../../store/store.js";
+import { logout } from "../../store/slices/auth.ts";
+import { currUserActions } from "../../store/slices/currUser.ts";
 
 const Header = () => {
-  type RootState = ReturnType<typeof appStore.getState>;
+  // type RootState = ReturnType<typeof appStore.getState>;
 
-  const isLoggedIn = useSelector((state: RootState) => state.auth.value);
+  const isLoggedIn = useSelector((state: any) => state.auth.value);
 
-  const currUser = useSelector((state: RootState) => state.currUser);
+  const currUser = useSelector((state: any) => state.currUser);
   console.log(currUser);
 
+
+  const dispatch = useDispatch();
+
   const exitClickhandler = () => {
-    appStore.dispatch(authActions.logout());
-    appStore.dispatch(currUserActions.setCurrUser(null));
+    dispatch(logout());
+    dispatch(currUserActions.setCurrUser(null));
     window.location.reload();
   };
 
