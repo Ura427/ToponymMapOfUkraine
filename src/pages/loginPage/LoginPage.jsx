@@ -18,7 +18,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 import { store } from "../../store/store.js";
 import { currUserActions } from "../../store/slices/currUser.ts";
-import { login } from "../../store/slices/auth.ts";
+import { login } from "../../store/slices/auth.js";
 import { useDispatch } from "react-redux";
 
 function Copyright(props) {

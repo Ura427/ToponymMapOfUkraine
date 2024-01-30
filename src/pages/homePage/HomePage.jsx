@@ -1,8 +1,8 @@
 import React from "react";
 
-import Header from "../header/Header.tsx";
-import Body from "../body/Body";
-import Footer from "../footer/Footer.tsx";
+import Header from "../../components/header/Header"
+import Body from "../homePage/Body";
+import Footer from "../../components/footer/Footer";
 
 
 const HomePage = () => {

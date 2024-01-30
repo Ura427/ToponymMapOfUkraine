@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { authReducer} from "./slices/auth.ts";
+import { authReducer} from "./slices/auth";
 import { currUserReducer } from "./slices/currUser.ts";
 
 

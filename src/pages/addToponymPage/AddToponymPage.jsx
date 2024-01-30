@@ -1,20 +1,23 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
 import Box from "@mui/material/Box";
 import { Typography } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 
-import SvgMap from "../svgMap/SvgMap";
+import SvgMap from "../../components/svgMap/SvgMap";
 
 
 import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
+import { RegionContext } from "../../store/context/regionContext";
 
 function AddToponym() {
   const navigate = useNavigate();
-  const [currRegion, setCurrRegion] = useState();
+  // const [currRegion, setCurrRegion] = useState();
+  const region = useContext(RegionContext);
+  const currRegion = region.value;
   const [currToponym, setCurrToponym] = useState();
   const [toponymDesc, setToponymDesc] = useState();
 
@@ -24,6 +27,7 @@ function AddToponym() {
     desc: ""
   })
 
+  //Validation for toponym input
   function toponymInputVadidate(event) {
 
     const toponym = event.target.value;
@@ -31,7 +35,7 @@ function AddToponym() {
     const ukrainianLettersRegex = /^[а-яіїєґ']+$/i;
     setCurrToponym(toponym);
 
-
+    //Check if input isn't empty
     if(toponym === ""){
         setErrorMessage(prevState => ({
             ...prevState,
@@ -40,6 +44,7 @@ function AddToponym() {
         return
     }
     
+    //Check if input contains only ukrainian letters
     if(!ukrainianLettersRegex.test(toponym)){
         setErrorMessage(prevState => ({
             ...prevState,
@@ -48,6 +53,7 @@ function AddToponym() {
         return
     }
 
+    //Check if input length is more than 3
     if(toponym.length < 3){
         setErrorMessage(prevState => ({
             ...prevState,
@@ -56,6 +62,7 @@ function AddToponym() {
         return
     }
 
+    //Check if toponym length is more than 50
     if(toponym.length > 50){
         setErrorMessage(prevState => ({
             ...prevState,
@@ -64,6 +71,7 @@ function AddToponym() {
         return
     }
 
+    //Remove errors if everything is ok
     setErrorMessage(prevState => ({
         ...prevState,
         toponym: ""
@@ -107,15 +115,10 @@ function AddToponym() {
 
   }
 
-//   console.log("/////////////////////////")
-//   console.log(currRegion === undefined)
-//   console.log(currToponym === undefined)
-//   console.log(toponymDesc === undefined)
-//   console.log(errorMessage.toponym !== "")
-//   console.log(errorMessage.desc !== "")
-
+  //Toponym save handler
   function btnClickHandler() {
 
+    //Check if data is valid
     if(currRegion === undefined 
         || currToponym === undefined
         || toponymDesc === undefined
@@ -124,17 +127,19 @@ function AddToponym() {
         console.log("Invalid input")
         return
     }
-    // toponymInputVadidate()
+
+    //Create obj with data
     const data = {
       regionName: currRegion,
       toponym: currToponym,
       description: toponymDesc,
     };
 
+    //Post data obj to backend
     axios
       .post("api/post", data)
       .then((response) => {
-        navigate("/")
+        navigate("/") //Return to main page
         console.log("Топонім додано успішно");
       })
       .catch((error) => {
@@ -158,25 +163,23 @@ function AddToponym() {
           gap: "1.5rem",
           marginTop: "2rem",
           marginBottom: "8rem",
-        //   backgroundColor: "lightgrey",
         }}
       >
         <Box>
-          <SvgMap height="20rem" setCurrRegion={setCurrRegion} />
+          {/* <SvgMap height="20rem" setCurrRegion={setCurrRegion} /> */}
+          <SvgMap height="20rem"/>
         </Box>
 
         <TextField
         required
         defaultValue={"Оберіть область на карті"}
         value={currRegion}
-        // error
         InputProps={{
             readOnly: true,
           }}/>
 
           
         <TextField
-        //   fullWidth
           label="Назва топоніма"
           value={currToponym}
           onChange={toponymInputVadidate}
@@ -184,8 +187,6 @@ function AddToponym() {
           required
           error={errorMessage.toponym !== ""}
         />
-
-        {/* <Typography>Додайте опис</Typography> */}
         <TextField
           id="outlined-multiline-static"
           label="Опис"

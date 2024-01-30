@@ -13,22 +13,22 @@ import Avatar from "@mui/material/Avatar";
 import { deepOrange } from "@mui/material/colors";
 
 import { useDispatch, useSelector } from "react-redux";
-import { store } from "../../store/store.js";
-import { logout } from "../../store/slices/auth.ts";
+import { logout } from "../../store/slices/auth";
 import { currUserActions } from "../../store/slices/currUser.ts";
 
 const Header = () => {
-  // type RootState = ReturnType<typeof appStore.getState>;
-
-  const isLoggedIn = useSelector((state: any) => state.auth.value);
-
-  const currUser = useSelector((state: any) => state.currUser);
+  
+  // Get login status
+  const isLoggedIn = useSelector((state) => state.auth.value);
+  const currUser = useSelector((state) => state.currUser);
   console.log(currUser);
 
-
+  //Create dispatch object
   const dispatch = useDispatch();
 
-  const exitClickhandler = () => {
+
+  //Performing Log out
+  const exitClickHandler = () => {
     dispatch(logout());
     dispatch(currUserActions.setCurrUser(null));
     window.location.reload();
@@ -62,7 +62,7 @@ const Header = () => {
               </Avatar>
               <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
                 <Button
-                  onClick={exitClickhandler}
+                  onClick={exitClickHandler}
                   color="inherit"
                   style={{ textDecoration: "none" }}
                 >
