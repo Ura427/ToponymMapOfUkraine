@@ -1,23 +1,30 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { RegionContext } from "../../store/context/regionContext";
+import { ToponymsDataContext } from "../../store/context/toponymsDataContext";
+import { BackendDataContext } from "../../store/context/backendDataContext";
 
 
 function SvgMap({
   height,
-  getInfo,
-  toponymsData,
+  // getInfo,
   setToponyms,
   setNotProvokeBySearch,
+  ProvokeByAddToponym,
+  setCurrRegion
 }) {
-    // function getInfo(region) {
-    //   const toponyms = toponymsData.filter((element) => {
-    //     return element.regionName === region;
-    //   });
-    //   setToponyms(toponyms);
-    // }
 
+
+
+  //returns a list of toponyms of current region (SHOULD RETURN AN ARRAY OF OBJECTS)
+  function getInfo(region) {
+    const toponyms = toponymsData.value.filter((element) => {
+      return element.regionName === region;
+    });
+    setToponyms(toponyms);
+  }
 
   const region = useContext(RegionContext)
+  const toponymsData = useContext(ToponymsDataContext)
 
 
   //Svg handlers
@@ -28,26 +35,34 @@ function SvgMap({
     const target = event.target;
     const elementName = target.getAttribute("name");
 
-
-
-    if (getInfo) {
+    if (!ProvokeByAddToponym) {
       getInfo(elementName);
+     
     }
+
+    if(ProvokeByAddToponym){
+      setCurrRegion(elementName)
+      return
+    }
+
+
+    // if (getInfo) {
+    //     getInfo(elementName);
+    // }
     // setCurrRegion(elementName); //Sets current region value to clicked svg's name
     // currDataStore.dispatch(currRegionActions.setCurrRegion(elementName));
     region.setValue(elementName)
     console.log(region.value)
   }
 
+  //SVG VISUAL EFFECTS
   function svgHoverHandler(event) {
     event.target.style.fill = "pink";
   }
-
   function svgLeaveHandler(event) {
     event.target.style.fill = "#858282";
     document.getElementById("name").style.opacity = 0;
   }
-
   function svgMoveHandler(event) {
     const target = event.target;
     const nameDiv = document.getElementById("name");
