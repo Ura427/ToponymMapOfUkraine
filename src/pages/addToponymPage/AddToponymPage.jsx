@@ -13,13 +13,27 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { RegionContext } from "../../store/context/regionContext";
 
+
+
+
+import Alert from '@mui/material/Alert';
+import CheckIcon from '@mui/icons-material/Check';
+
+
+
+
 function AddToponym() {
   const navigate = useNavigate();
   // const [currRegion, setCurrRegion] = useState();
   const region = useContext(RegionContext);
-  const currRegion = region.value;
+  // const currRegion = region.value;
+  const [currRegion, setCurrRegion] = useState();
   const [currToponym, setCurrToponym] = useState();
   const [toponymDesc, setToponymDesc] = useState();
+  const [ProvokeByAddToponym, setProvokeByAddToponym] = useState(true);
+
+  const [alertState, setAlertState] = useState("success")
+  const [alertMessage, setAlertMessage] = useState("")
 
   const[didEdit, setDidEdit] = useState();
   const[errorMessage, setErrorMessage] = useState({
@@ -158,25 +172,37 @@ function AddToponym() {
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
+          // flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
           gap: "1.5rem",
           marginTop: "2rem",
           marginBottom: "8rem",
+          height: "100vh"
         }}
       >
         <Box>
-          {/* <SvgMap height="20rem" setCurrRegion={setCurrRegion} /> */}
-          <SvgMap height="20rem"/>
+          <SvgMap height="20rem" ProvokeByAddToponym={ProvokeByAddToponym} setCurrRegion={setCurrRegion}/>
         </Box>
 
+
+        <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem"
+        }}
+        >
+   
         <TextField
         required
         defaultValue={"Оберіть область на карті"}
         value={currRegion}
         InputProps={{
             readOnly: true,
-          }}/>
+          }}
+          sx={{ width: "400px"}}
+          />
 
           
         <TextField
@@ -186,6 +212,7 @@ function AddToponym() {
           helperText={errorMessage.toponym}
           required
           error={errorMessage.toponym !== ""}
+          sx={{ width: "400px"}}
         />
         <TextField
           id="outlined-multiline-static"
@@ -202,9 +229,14 @@ function AddToponym() {
           sx={{ width: "400px"}}
         />
 
+      {/* <Alert icon={<CheckIcon fontSize="inherit" />} severity={alertState}>
+        {alertMessage}
+      </Alert> */}
+
         <Button variant="contained" onClick={btnClickHandler}>
           Зберегти
         </Button>
+        </Box>
       </Box>
     </>
   );
